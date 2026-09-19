@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { CheckCircle, AlertCircle } from 'lucide-react';
+import { API_URL } from '../config';
 
 export default function RegistrationForm() {
   const [formData, setFormData] = useState({
@@ -24,7 +25,7 @@ export default function RegistrationForm() {
   const [loadingWorkshops, setLoadingWorkshops] = useState(true);
 
   useEffect(() => {
-    fetch('http://localhost:5001/api/workshops')
+    fetch(`${API_URL}/api/workshops`)
       .then(res => res.json())
       .then(data => {
         if (data && data.success) {
@@ -52,7 +53,7 @@ export default function RegistrationForm() {
     setErrorMessage('');
     
     try {
-      const response = await fetch('http://localhost:5001/api/register', {
+      const response = await fetch(`${API_URL}/api/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)

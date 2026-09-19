@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Users, Search, Download, Trash2, Calendar, MapPin, Hash, Plus } from 'lucide-react';
+import { API_URL } from '../config';
 
 export default function AdminPanel() {
   const [activeTab, setActiveTab] = useState('registrations'); // 'registrations' | 'workshops'
@@ -21,7 +22,7 @@ export default function AdminPanel() {
 
   const fetchRegistrations = async () => {
     try {
-      const res = await fetch('http://localhost:5001/api/admin/registrations');
+      const res = await fetch(`${API_URL}/api/admin/registrations`);
       const data = await res.json();
       if (data.success) {
         setRegistrations(data.data);
@@ -35,7 +36,7 @@ export default function AdminPanel() {
 
   const fetchWorkshops = async () => {
     try {
-      const res = await fetch('http://localhost:5001/api/workshops');
+      const res = await fetch(`${API_URL}/api/workshops`);
       const data = await res.json();
       if (data.success) {
         setWorkshops(data.data);
@@ -50,7 +51,7 @@ export default function AdminPanel() {
   const handleDeleteReg = async (id) => {
     if (!window.confirm('Are you sure you want to delete this registration?')) return;
     try {
-      const res = await fetch(`http://localhost:5001/api/admin/registrations/${id}`, { method: 'DELETE' });
+      const res = await fetch(`${API_URL}/api/admin/registrations/${id}`, { method: 'DELETE' });
       if (res.ok) {
         setRegistrations(registrations.filter(r => r.id !== id));
         fetchWorkshops(); // refresh counts
@@ -63,7 +64,7 @@ export default function AdminPanel() {
     if (!newWorkshop.date || !newWorkshop.location || !newWorkshop.maxSlots) return;
     
     try {
-      const res = await fetch('http://localhost:5001/api/admin/workshops', {
+      const res = await fetch(`${API_URL}/api/admin/workshops`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newWorkshop)
@@ -78,7 +79,7 @@ export default function AdminPanel() {
   const handleDeleteWorkshop = async (id) => {
     if (!window.confirm('Are you sure? This will delete the workshop date.')) return;
     try {
-      const res = await fetch(`http://localhost:5001/api/admin/workshops/${id}`, { method: 'DELETE' });
+      const res = await fetch(`${API_URL}/api/admin/workshops/${id}`, { method: 'DELETE' });
       if (res.ok) fetchWorkshops();
     } catch (err) { console.error(err); }
   };

@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { MapPin, Calendar, Users, ArrowRight } from 'lucide-react';
+import { API_URL } from '../config';
 
 export default function UpcomingWorkshops() {
   const [workshops, setWorkshops] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('http://localhost:5001/api/workshops')
+    fetch(`${API_URL}/api/workshops`)
       .then(res => res.json())
       .then(data => {
         if (data && data.success) {
