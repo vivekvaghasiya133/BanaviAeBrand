@@ -1,0 +1,74 @@
+[
+  {
+    "id": "remina",
+    "number": "01",
+    "name": "@dr.remina",
+    "category": "Social Media · UGC",
+    "stat": "+417K followers",
+    "description": "Featured in Forbes Canada. $100K+ revenue in 90 days through high-converting UGC funnels.",
+    "deliverables": ["Organic TikTok Strategy", "Reels Production", "Influencer Seeding"],
+    "image": "/remina/forbes-cover.png",
+    "thumbnail": "/work/sq/7dc40788-c623-470f-b743-9eef91464d78-5.png",
+    "accent": "#EC4899"
+  },
+  {
+    "id": "savants",
+    "number": "02",
+    "name": "Savants AI",
+    "category": "AI SEO · Web Dev",
+    "stat": "320% organic growth",
+    "description": "Ranked #1 for 14 AI-related keywords in 6 months with programmatic SEO & AI search optimization.",
+    "deliverables": ["Full Stack Web Platform", "Programmatic SEO", "LLM Citations"],
+    "image": "/bella-mo.png",
+    "thumbnail": "/work/sq/22c2e543-6b02-4886-99c8-751c3bf72a67-6.png",
+    "accent": "#00D4E8"
+  },
+  {
+    "id": "pongbot",
+    "number": "03",
+    "name": "Pongbot",
+    "category": "Meta Ads · Branding",
+    "stat": "5.2× ROAS",
+    "description": "Automated ad creative testing system generating consistent 5.2x return on ad spend on Meta & TikTok.",
+    "deliverables": ["Meta Performance Ads", "Creative Studio", "Retargeting Matrix"],
+    "image": "/pongbot/aerial-blue-court.png",
+    "thumbnail": "/work/sq/dc2e6963-fac1-4d62-8a8c-9c2ecccbef09-4.png",
+    "accent": "#BFFF00"
+  },
+  {
+    "id": "slavista",
+    "number": "04",
+    "name": "Slavista",
+    "category": "Branding · Identity",
+    "stat": "0→1 Brand Launch",
+    "description": "Zero to launch identity, packaging design, and omni-channel acquisition for modern consumer brand.",
+    "deliverables": ["Visual Identity & 3D", "Packaging System", "Shopify Plus Build"],
+    "image": "/pexels-workspace.jpg",
+    "thumbnail": "/work/sq/b4d60dba-6a88-4974-ac95-1590bceff34e-8.png",
+    "accent": "#F97316"
+  },
+  {
+    "id": "gateway",
+    "number": "05",
+    "name": "Gateway Counseling",
+    "category": "Non-Profit · Google Grants",
+    "stat": "$120K granted",
+    "description": "Google Ad Grants management acquiring $10K/month in free ad credits with +210% increase in patient bookings.",
+    "deliverables": ["Google Ad Grants", "Conversion Funnels", "HIPAA-Compliant Analytics"],
+    "image": "/work/sq/1709530734423-1Y8MAG5VJP5YZU8B4BL0-IMG_9748.jpg",
+    "thumbnail": "/work/sq/4f690480-71b4-48cb-9dcd-810571566eb4-7.png",
+    "accent": "#10B981"
+  },
+  {
+    "id": "duck-english",
+    "number": "06",
+    "name": "Duck English",
+    "category": "Viral TikTok · EdTech",
+    "stat": "2.4M views",
+    "description": "Viral educational short-form content scaling mobile application user acquisition rapidly across global markets.",
+    "deliverables": ["Viral Scripting", "TikTok Spark Ads", "ASO Optimization"],
+    "image": "/work/sq/31c423ed-eaf9-4686-9e0d-43f77159f6d5-2.png",
+    "thumbnail": "/work/sq/31c423ed-eaf9-4686-9e0d-43f77159f6d5-2.png",
+    "accent": "#A78BFA"
+  }
+]

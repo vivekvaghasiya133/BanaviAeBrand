@@ -1,0 +1,314 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --font-fraunces: 'Fraunces', serif;
+    --font-space: 'Space Grotesk', sans-serif;
+  }
+  body {
+    background-color: #050507;
+    color: #ffffff;
+    font-family: var(--font-space), -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+}
+
+/* ── Hero Exact Animations ── */
+
+        @keyframes planet-float {
+          from { transform: translateY(-8px); }
+          to   { transform: translateY(8px);  }
+        }
+        @keyframes surface-pan {
+          from { background-position: 0% center; }
+          to   { background-position: 200% center; }
+        }
+        @keyframes planet-fadein {
+          from { opacity: 0; transform: scale(0.6); }
+          to   { opacity: 1; transform: scale(1);   }
+        }
+        @keyframes planet-pulse {
+          0%, 100% { opacity: 1;   transform: scale(1);   }
+          50%      { opacity: 0.5; transform: scale(1.45); }
+        }
+        @keyframes star-glow {
+          0%, 100% { box-shadow: 0 0 28px rgba(245,158,11,0.35), 0 0 65px rgba(245,158,11,0.12), 0 0 120px rgba(245,158,11,0.05); }
+          50%      { box-shadow: 0 0 52px rgba(245,158,11,0.60), 0 0 110px rgba(245,158,11,0.22), 0 0 160px rgba(245,158,11,0.10); }
+        }
+        @keyframes spin-orbit {
+          from { transform: rotate(0deg); }
+          to   { transform: rotate(360deg); }
+        }
+        
+          @keyframes planet-float-0 {
+            from { transform: translate(12px, -7px); }
+            to   { transform: translate(-8px, 10px); }
+          }
+        
+          @keyframes planet-float-1 {
+            from { transform: translate(-10px, 8px); }
+            to   { transform: translate(9px, -8px); }
+          }
+        
+          @keyframes planet-float-2 {
+            from { transform: translate(8px, 11px); }
+            to   { transform: translate(-10px, -6px); }
+          }
+        
+          @keyframes planet-float-3 {
+            from { transform: translate(-9px, -10px); }
+            to   { transform: translate(10px, 7px); }
+          }
+        
+          @keyframes planet-float-4 {
+            from { transform: translate(9px, 9px); }
+            to   { transform: translate(-7px, -10px); }
+          }
+        
+
+        /* ── Twinkling stars ── */
+        @keyframes star-twinkle {
+          0%, 100% { opacity: var(--star-o, 0.2); transform: scale(1); }
+          50%      { opacity: 1;                   transform: scale(1.8); }
+        }
+
+        /* ── Shooting stars — diagonal sweep with fade in/out ── */
+        @keyframes shoot-star {
+          0%   { transform: translate(0,    0)    rotate(25deg); opacity: 0; }
+          4%   { opacity: 1; }
+          50%  { opacity: 1; }
+          100% { transform: translate(130vw, 70vh) rotate(25deg); opacity: 0; }
+        }
+
+        /* ── Nebula drift — slow, organic floating per cloud ── */
+        @keyframes nebula-drift-0 {
+          from { transform: translate(-50%, -50%) translate(0, 0)    scale(1);   }
+          to   { transform: translate(-50%, -50%) translate(40px, -30px) scale(1.15); }
+        }
+        @keyframes nebula-drift-1 {
+          from { transform: translate(-50%, -50%) translate(0, 0)    scale(1);   }
+          to   { transform: translate(-50%, -50%) translate(-50px, 40px) scale(1.2); }
+        }
+        @keyframes nebula-drift-2 {
+          from { transform: translate(-50%, -50%) translate(0, 0)    scale(1);   }
+          to   { transform: translate(-50%, -50%) translate(30px, 50px) scale(0.9); }
+        }
+        @keyframes nebula-drift-3 {
+          from { transform: translate(-50%, -50%) translate(0, 0)    scale(1);   }
+          to   { transform: translate(-50%, -50%) translate(-40px, -30px) scale(1.1); }
+        }
+
+        /* ── Lens flare gentle pulse ── */
+        @keyframes lens-flare-pulse {
+          0%, 100% { opacity: 0.55; }
+          50%      { opacity: 1;    }
+        }
+
+        /* ── Moon orbits — unique tilted ellipse per planet ── */
+        
+          @keyframes moon-orbit-0 {
+            from { transform: translate(-50%, -50%) rotate(0deg); }
+            to   { transform: translate(-50%, -50%) rotate(360deg); }
+          }
+        
+          @keyframes moon-orbit-1 {
+            from { transform: translate(-50%, -50%) rotate(73deg); }
+            to   { transform: translate(-50%, -50%) rotate(433deg); }
+          }
+        
+          @keyframes moon-orbit-2 {
+            from { transform: translate(-50%, -50%) rotate(146deg); }
+            to   { transform: translate(-50%, -50%) rotate(506deg); }
+          }
+        
+          @keyframes moon-orbit-3 {
+            from { transform: translate(-50%, -50%) rotate(219deg); }
+            to   { transform: translate(-50%, -50%) rotate(579deg); }
+          }
+        
+          @keyframes moon-orbit-4 {
+            from { transform: translate(-50%, -50%) rotate(292deg); }
+            to   { transform: translate(-50%, -50%) rotate(652deg); }
+          }
+        
+      
+
+/* ── Section 2 & Crystal Orb Exact Animations ── */
+
+        @keyframes sc-dark-wipe {
+          0%   { clip-path: inset(0 0% 0 0); }
+          100% { clip-path: inset(0 100% 0 0); }
+        }
+        @keyframes sc-dark-bar {
+          0%   { transform: translateX(-100%); opacity: 1; }
+          85%  { opacity: 1; }
+          100% { transform: translateX(110%); opacity: 0; }
+        }
+      
+
+
+              @keyframes fv-char-land {
+                0%   { opacity: 0; transform: translateY(28px) scale(0.92); filter: blur(6px); }
+                60%  { filter: blur(0); }
+                100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+              }
+            
+
+
+          @keyframes cv-float {
+            0%, 100% { transform: translateY(0px);    }
+            50%       { transform: translateY(-16px);  }
+          }
+          @keyframes cv-swirl-1 {
+            from { transform: rotate(0deg);   }
+            to   { transform: rotate(360deg); }
+          }
+          @keyframes cv-swirl-2 {
+            from { transform: rotate(0deg);    }
+            to   { transform: rotate(-360deg); }
+          }
+          @keyframes cv-breathe {
+            0%, 100% { transform: scale(1);     opacity: 0.55; }
+            50%       { transform: scale(1.14);  opacity: 1;    }
+          }
+          @keyframes cv-particle {
+            0%, 100% { transform: translateY(0px)  translateX(0px);  opacity: 0.28; }
+            33%       { transform: translateY(-9px)  translateX(5px);  opacity: 0.85; }
+            66%       { transform: translateY(-4px)  translateX(-7px); opacity: 0.45; }
+          }
+          @keyframes cv-twinkle {
+            0%, 100% { opacity: 0.15; }
+            50%       { opacity: 0.72; }
+          }
+          .cv-float    { animation: cv-float   6.5s ease-in-out infinite; will-change: transform; }
+          .cv-swirl-1  { animation: cv-swirl-1 20s   linear     infinite; will-change: transform; }
+          .cv-swirl-2  { animation: cv-swirl-2 13s   linear     infinite; will-change: transform; }
+          .cv-breathe  { animation: cv-breathe  4.5s ease-in-out infinite; will-change: transform, opacity; }
+          .cv-particle { animation: cv-particle 3.8s ease-in-out infinite; will-change: transform, opacity; }
+          .cv-moon     { will-change: transform; }
+          @keyframes cv-shake {
+            0%,  100% { transform: rotate(0deg)    scale(1);    }
+            15%        { transform: rotate(-3.5deg) scale(1.04); }
+            30%        { transform: rotate(3.5deg)  scale(1.02); }
+            45%        { transform: rotate(-2.5deg) scale(1.03); }
+            60%        { transform: rotate(2deg)    scale(1.02); }
+            75%        { transform: rotate(-1deg)   scale(1.01); }
+          }
+          /* Shake plays 0–30% of a 2s loop so the ball shakes then rests */
+          @keyframes cv-shake-loop {
+            0%   { transform: rotate(0deg)    scale(1);    }
+            4%   { transform: rotate(-3.5deg) scale(1.04); }
+            8%   { transform: rotate(3.5deg)  scale(1.02); }
+            12%  { transform: rotate(-2.5deg) scale(1.03); }
+            16%  { transform: rotate(2deg)    scale(1.02); }
+            20%  { transform: rotate(-1deg)   scale(1.01); }
+            26%, 100% { transform: rotate(0deg) scale(1); }
+          }
+          @keyframes cv-moon {
+            from { transform: rotate(0deg); }
+            to   { transform: rotate(360deg); }
+          }
+          .cv-moon { animation: cv-moon 18s linear infinite; }
+          @keyframes cv-platform-pulse {
+            0%, 100% { opacity: 0.7; transform: scale(1); }
+            50%      { opacity: 1;   transform: scale(1.04); }
+          }
+          @keyframes cv-platform-spin {
+            from { transform: rotate(0deg); }
+            to   { transform: rotate(360deg); }
+          }
+          @keyframes cv-data-blink {
+            0%, 100% { opacity: 0.4; transform: scale(1); }
+            50%      { opacity: 1;   transform: scale(1.5); }
+          }
+          /* All-seeing eye — pupil glances around: center → left → center → right → center → up → center */
+          @keyframes cv-eye-look {
+            0%,  8%   { transform: translate(0px, 0px); }
+            14%, 24%  { transform: translate(-26px, 0px); }    /* look LEFT */
+            30%, 32%  { transform: translate(0px, 0px); }
+            38%, 48%  { transform: translate(26px, 0px); }     /* look RIGHT */
+            54%, 56%  { transform: translate(0px, 0px); }
+            62%, 72%  { transform: translate(0px, -16px); }    /* look UP */
+            78%, 100% { transform: translate(0px, 0px); }
+          }
+          .cv-eye-pupil { animation: cv-eye-look 9s cubic-bezier(0.65, 0, 0.35, 1) infinite; transform-origin: center; }
+          /* Eyelid blink — quick close every ~7s */
+          @keyframes cv-eye-blink {
+            0%, 92%, 100% { opacity: 0; }
+            94%, 96%      { opacity: 1; }
+          }
+          .cv-eye-lid { animation: cv-eye-blink 7s ease-in-out infinite; }
+          @keyframes film-scan {
+            from { transform: translateY(-4px); }
+            to   { transform: translateY(100vh); }
+          }
+          .film-scan-beam { animation: film-scan 3s linear infinite; }
+          .cv-sphere.is-hovering {
+            animation: cv-shake-loop 2.2s ease-in-out infinite !important;
+            box-shadow:
+              0 0 100px 30px rgba(170,80,255,0.6),
+              0 0 200px 60px rgba(80,180,255,0.3),
+              0 0 300px 100px rgba(255,80,200,0.18),
+              0 90px 140px rgba(0,0,0,0.95),
+              inset 0 0 80px rgba(130,60,255,0.3),
+              inset 0 -55px 90px rgba(20,0,70,0.6) !important;
+          }
+        
+
+/* ── Dog Walk & Flip Pulse ── */
+
+/* Robo-Dog Space Walk Animations */
+@keyframes dogWalk {
+  0%   { transform: translateX(-160px); }
+  100% { transform: translateX(110vw); }
+}
+@keyframes bubbleFloat {
+  0%   { transform: translateX(-50%) translateY(0); }
+  100% { transform: translateX(-50%) translateY(-7px); }
+}
+@keyframes wagTail {
+  from { transform: rotate(-18deg); }
+  to   { transform: rotate(18deg); }
+}
+@keyframes legA {
+  from { transform: rotate(-22deg); }
+  to   { transform: rotate(22deg); }
+}
+@keyframes legB {
+  from { transform: rotate(22deg); }
+  to   { transform: rotate(-22deg); }
+}
+@keyframes flipPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.5; transform: scale(0.95); }
+}
+
+
+/* ── Brand Marquee ── */
+@keyframes clientScroll {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+.animate-client-scroll {
+  animation: clientScroll 24s linear infinite;
+}
+.animate-client-scroll:hover {
+  animation-play-state: paused;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #050507;
+}
+::-webkit-scrollbar-thumb {
+  background: #232330;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #BFFF00;
+}

@@ -1,0 +1,16 @@
+[
+  {
+    "id": "ws_1",
+    "date": "4th October 2026",
+    "location": "Surat, Gujarat",
+    "maxSlots": 30,
+    "createdAt": "2026-09-19T08:52:17.973Z"
+  },
+  {
+    "id": "ws_2",
+    "date": "10th October 2026",
+    "location": "Ahmedabad, Gujarat",
+    "maxSlots": 30,
+    "createdAt": "2026-09-19T08:52:17.976Z"
+  }
+]

@@ -1,0 +1,36 @@
+[
+  {
+    "id": "reg_1789803463393",
+    "name": "Vaghasiya vivek",
+    "email": "vivekvaghasiya133@gmail.com",
+    "phone": "8000133106",
+    "city": "Surat",
+    "instagramHandle": "vivek.socialflipss",
+    "profession": "Business Owner",
+    "whyJoin": "Shooting",
+    "interestArea": "Business",
+    "socialExperience": "Intermediate",
+    "editingExperience": "Yes",
+    "participationAgreement": true,
+    "source": "instagram",
+    "createdAt": "2026-09-19T07:37:43.393Z"
+  },
+  {
+    "id": "reg_1789808133085",
+    "name": "VAGHASIYA NITABEN DILIPBHAI",
+    "email": "vivekvaghasiya133@gmail.com",
+    "phone": "8000133106",
+    "city": "Surat (M Corp.) (Part)",
+    "instagramHandle": "vivek.socialflipss",
+    "profession": "Business Owner",
+    "whyJoin": "sdsd",
+    "interestArea": "Business",
+    "socialExperience": "Intermediate",
+    "editingExperience": "Yes",
+    "participationAgreement": true,
+    "source": "instagram",
+    "workshopId": "ws_2",
+    "workshopDate": "10th October 2026",
+    "createdAt": "2026-09-19T08:55:33.085Z"
+  }
+]
