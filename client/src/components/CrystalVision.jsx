@@ -226,7 +226,7 @@ export default function CrystalVision({ onOpenOnboarding }) {
         {/* Tagline */}
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.05] border border-white/10 text-[#3B82F6] text-xs font-bold uppercase tracking-[0.3em] mb-6">
           <Sparkles size={12} />
-          <span>Up Digital × BanaviAeBrand</span>
+          <span>BanaviAeBrand × The Future</span>
         </div>
 
         {/* Animated Letter Headline */}

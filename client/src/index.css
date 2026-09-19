@@ -7,10 +7,12 @@
     --font-fraunces: 'Fraunces', serif;
     --font-space: 'Space Grotesk', sans-serif;
   }
-  body {
+  html, body {
     background-color: #050507;
     color: #ffffff;
     font-family: var(--font-space), -apple-system, BlinkMacSystemFont, sans-serif;
+    overflow-x: hidden;
+    width: 100%;
   }
 }
 
