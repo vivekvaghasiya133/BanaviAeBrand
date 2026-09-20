@@ -89,8 +89,7 @@ export default function Footer({ onOpenOnboarding }) {
               </div>
             </div>
 
-            {/* Social handles */}
-            <div className="flex items-center gap-3 pt-2">
+            <div className="flex flex-wrap items-center gap-3 pt-2">
               <a
                 href="https://www.instagram.com/banaviaebrand"
                 target="_blank"
@@ -105,7 +104,7 @@ export default function Footer({ onOpenOnboarding }) {
                 </svg>
               </a>
               <a
-                href="https://www.linkedin.com/company/banaviaebrand"
+                href="https://www.linkedin.com/company/banaviaebrand/"
                 target="_blank"
                 rel="noreferrer"
                 className="w-9 h-9 rounded-lg bg-white/5 hover:bg-[#3B82F6] hover:text-black text-white/70 flex items-center justify-center transition-colors"
@@ -118,14 +117,37 @@ export default function Footer({ onOpenOnboarding }) {
                 </svg>
               </a>
               <a
-                href="https://www.facebook.com/banaviaebrand"
+                href="https://x.com/banaviaebrand"
                 target="_blank"
                 rel="noreferrer"
                 className="w-9 h-9 rounded-lg bg-white/5 hover:bg-[#3B82F6] hover:text-black text-white/70 flex items-center justify-center transition-colors"
-                aria-label="Facebook"
+                aria-label="X (Twitter)"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                </svg>
+              </a>
+              <a
+                href="https://www.threads.com/"
+                target="_blank"
+                rel="noreferrer"
+                className="w-9 h-9 rounded-lg bg-white/5 hover:bg-[#3B82F6] hover:text-black text-white/70 flex items-center justify-center transition-colors"
+                aria-label="Threads"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M14.12 10.635c.164.887-.193 1.834-.823 2.535-1.107 1.205-3.056 1.488-4.502.825-1.285-.59-1.956-1.896-1.91-3.275.056-1.637 1.402-2.915 3.036-2.91 1.493.003 2.766 1.137 2.97 2.617h1.996c-.305-2.502-2.327-4.398-4.87-4.456-2.824-.066-5.244 2.052-5.503 4.85-.27 2.923 1.954 5.512 4.881 5.69 1.635.099 3.197-.562 4.195-1.785.49-.597.834-1.31.95-2.072h-5.418v-2.019h5.013zM12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm0 18c-4.411 0-8-3.589-8-8s3.589-8 8-8 8 3.589 8 8-3.589 8-8 8z" />
+                </svg>
+              </a>
+              <a
+                href="https://youtube.com/@banaviaebrand"
+                target="_blank"
+                rel="noreferrer"
+                className="w-9 h-9 rounded-lg bg-white/5 hover:bg-[#3B82F6] hover:text-black text-white/70 flex items-center justify-center transition-colors"
+                aria-label="YouTube"
               >
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
+                  <path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z" />
+                  <polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02" />
                 </svg>
               </a>
             </div>

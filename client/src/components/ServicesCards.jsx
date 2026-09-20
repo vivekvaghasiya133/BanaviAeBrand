@@ -113,6 +113,7 @@ export default function ServicesCards({ onOpenOnboarding }) {
                     style={{
                       backfaceVisibility: 'hidden',
                       WebkitBackfaceVisibility: 'hidden',
+                      transform: 'translateZ(1px)',
                     }}
                   >
                     {/* Top colored accent line */}
@@ -166,7 +167,7 @@ export default function ServicesCards({ onOpenOnboarding }) {
                     style={{
                       backfaceVisibility: 'hidden',
                       WebkitBackfaceVisibility: 'hidden',
-                      transform: 'rotateY(180deg)',
+                      transform: 'rotateY(180deg) translateZ(1px)',
                       background: `linear-gradient(135deg, ${item.color} 0%, ${item.color}dd 100%)`,
                     }}
                   >
