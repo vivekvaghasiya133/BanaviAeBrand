@@ -85,8 +85,7 @@ export default function AboutTeam() {
               <div 
                 className="aspect-[4/5] relative overflow-hidden bg-[#050507] border-b border-white/10"
               >
-                <div className="absolute inset-0 bg-gradient-to-t from-[#101018] via-transparent to-transparent z-10"></div>
-                <div className="absolute inset-0 opacity-30 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] mix-blend-overlay"></div>
+                <div className="absolute inset-0 opacity-30 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] mix-blend-overlay z-10"></div>
                 
                 <div 
                   className="absolute inset-0 opacity-20 blur-2xl transition-colors duration-700"
@@ -108,7 +107,7 @@ export default function AboutTeam() {
                   </div>
                 )}
                 
-                <div className="absolute bottom-4 left-4 right-4 z-20">
+                <div className="absolute bottom-4 left-4 right-4 z-20 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
                   <h3 className="text-2xl font-black text-white leading-tight uppercase">
                     {trainer.firstName} <br/>
                     <span className={`text-transparent bg-clip-text bg-gradient-to-r ${trainer.gradient}`}>
