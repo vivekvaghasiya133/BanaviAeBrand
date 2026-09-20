@@ -60,7 +60,9 @@ export default function Footer({ onOpenOnboarding }) {
           {/* Col 1 & 2: Brand Info */}
           <div className="lg:col-span-2 space-y-5">
             <a href="/" className="inline-block">
-              <img src="/banaviaebrand-logo.png" alt="BanaviAeBrand Logo" className="h-10 md:h-12 object-contain" />
+              <span className="text-2xl font-black tracking-tighter text-white">
+                Banavi<span className="text-[#3B82F6]">Ae</span>Brand
+              </span>
             </a>
 
             <p className="text-white/60 text-sm leading-relaxed max-w-sm mt-4">

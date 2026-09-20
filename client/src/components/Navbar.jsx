@@ -97,7 +97,9 @@ export default function Navbar({ onOpenOnboarding }) {
             className="flex items-center gap-2 relative z-10 transition-transform duration-300 hover:scale-105 active:scale-95"
             aria-label="BanaviAeBrand Home"
           >
-            <img src="/banaviaebrand-logo.png" alt="BanaviAeBrand Logo" className="h-10 md:h-12 object-contain" />
+            <span className="text-2xl font-black tracking-tighter text-white">
+              Banavi<span className="text-[#3B82F6]">Ae</span>Brand
+            </span>
           </a>
 
           {/* Easter egg toast */}
