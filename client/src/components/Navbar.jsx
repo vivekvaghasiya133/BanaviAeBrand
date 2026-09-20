@@ -97,9 +97,7 @@ export default function Navbar({ onOpenOnboarding }) {
             className="flex items-center gap-2 relative z-10 transition-transform duration-300 hover:scale-105 active:scale-95"
             aria-label="BanaviAeBrand Home"
           >
-            <span className="text-2xl font-black tracking-tighter text-white">
-              Banavi<span className="text-[#3B82F6]">Ae</span>Brand
-            </span>
+            <img src="/banaviaebrand-logo.png" alt="BanaviAeBrand Logo" className="h-10 md:h-12 object-contain" />
           </a>
 
           {/* Easter egg toast */}
@@ -250,13 +248,6 @@ export default function Navbar({ onOpenOnboarding }) {
               Services
             </a>
             <a
-              href="#portfolio"
-              onClick={() => setMobileMenuOpen(false)}
-              className="text-white/80 hover:text-[#3B82F6] py-2 border-b border-white/5"
-            >
-              Case Studies
-            </a>
-            <a
               href="#team"
               onClick={() => setMobileMenuOpen(false)}
               className="text-white/80 hover:text-[#3B82F6] py-2 border-b border-white/5"
@@ -264,12 +255,11 @@ export default function Navbar({ onOpenOnboarding }) {
               Team
             </a>
             <a
-              href="#maya"
+              href="#register"
               onClick={() => setMobileMenuOpen(false)}
               className="text-white/80 hover:text-[#3B82F6] py-2 border-b border-white/5 flex items-center justify-between"
             >
-              <span>AI Employees</span>
-              <span className="text-xs bg-[#3B82F6]/10 text-[#3B82F6] px-2 py-0.5 rounded">Live Maya</span>
+              <span>Apply Now</span>
             </a>
             <a
               href="#footer"

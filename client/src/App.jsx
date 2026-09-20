@@ -15,7 +15,6 @@ import AdminPanel from './components/AdminPanel';
 import BanaviAeBrandIntro from './components/BanaviAeBrandIntro';
 import SecretBusiness from './components/SecretBusiness';
 import BusinessCategories from './components/BusinessCategories';
-import Timeline from './components/Timeline';
 import LiveEditing from './components/LiveEditing';
 import PreRecorded from './components/PreRecorded';
 import AfterEvent from './components/AfterEvent';
@@ -43,7 +42,6 @@ function App() {
         <CrystalVision />
         <SecretBusiness />
         <BusinessCategories />
-        <Timeline />
         <DeliveredMetrics />
         <LiveEditing />
         <PreRecorded />

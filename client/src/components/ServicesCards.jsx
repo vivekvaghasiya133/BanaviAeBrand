@@ -94,7 +94,7 @@ export default function ServicesCards({ onOpenOnboarding }) {
             return (
               <div
                 key={item.num}
-                className="cursor-pointer h-80 w-full group select-none"
+                className="cursor-pointer h-72 md:h-80 w-full group select-none"
                 style={{ perspective: '1200px' }}
                 onMouseEnter={() => setFlipped((prev) => ({ ...prev, [idx]: true }))}
                 onMouseLeave={() => setFlipped((prev) => ({ ...prev, [idx]: false }))}
@@ -182,9 +182,6 @@ export default function ServicesCards({ onOpenOnboarding }) {
                       <p className="text-black/50 text-[10px] font-black tracking-widest uppercase mb-2">
                         {item.num}
                       </p>
-                      <h3 className="text-black font-black text-2xl leading-tight">
-                        {item.title}
-                      </h3>
                     </div>
 
                     <p className="relative z-10 text-black/80 text-sm leading-relaxed flex-1 mt-4 font-bold">

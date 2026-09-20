@@ -110,7 +110,7 @@ export default function RegistrationForm() {
       <form onSubmit={handleSubmit} className="space-y-5">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           <div>
-            <label className="block text-sm font-bold text-white mb-1 uppercase tracking-wider">Full Name *</label>
+            <label className="block text-sm font-bold text-white mb-1 uppercase tracking-wider">Full Name&nbsp;*</label>
             <input 
               type="text" 
               name="name"
@@ -123,7 +123,7 @@ export default function RegistrationForm() {
           </div>
           
           <div>
-            <label className="block text-sm font-bold text-white mb-1 uppercase tracking-wider">Select Workshop Date *</label>
+            <label className="block text-sm font-bold text-white mb-1 uppercase tracking-wider">Select Workshop Date&nbsp;*</label>
             <select 
               name="workshopId"
               required
@@ -145,7 +145,7 @@ export default function RegistrationForm() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           <div>
-            <label className="block text-sm font-bold text-white mb-1 uppercase tracking-wider">Mobile Number *</label>
+            <label className="block text-sm font-bold text-white mb-1 uppercase tracking-wider">Mobile Number&nbsp;*</label>
             <input 
               type="tel" 
               name="phone"
@@ -157,7 +157,7 @@ export default function RegistrationForm() {
             />
           </div>
           <div>
-            <label className="block text-sm font-bold text-white mb-1 uppercase tracking-wider">Email Address *</label>
+            <label className="block text-sm font-bold text-white mb-1 uppercase tracking-wider">Email Address&nbsp;*</label>
             <input 
               type="email" 
               name="email"
@@ -172,7 +172,7 @@ export default function RegistrationForm() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           <div>
-            <label className="block text-sm font-bold text-white mb-1 uppercase tracking-wider">City *</label>
+            <label className="block text-sm font-bold text-white mb-1 uppercase tracking-wider">City&nbsp;*</label>
             <input 
               type="text" 
               name="city"
@@ -185,7 +185,7 @@ export default function RegistrationForm() {
           </div>
 
           <div>
-            <label className="block text-sm font-bold text-white mb-1 uppercase tracking-wider">Current Profession *</label>
+            <label className="block text-sm font-bold text-white mb-1 uppercase tracking-wider">Current Profession&nbsp;*</label>
             <input 
               type="text" 
               name="profession"
@@ -216,7 +216,7 @@ export default function RegistrationForm() {
         </div>
 
         <div>
-          <label className="block text-sm font-bold text-white mb-1 uppercase tracking-wider">Which area interests you most? *</label>
+          <label className="block text-sm font-bold text-white mb-1 uppercase tracking-wider">Which area interests you most?&nbsp;*</label>
           <select 
             name="interestArea"
             required
@@ -235,7 +235,7 @@ export default function RegistrationForm() {
         </div>
 
         <div>
-          <label className="block text-sm font-bold text-white mb-1 uppercase tracking-wider">Why do you want to join BanaviAeBrand? *</label>
+          <label className="block text-sm font-bold text-white mb-1 uppercase tracking-wider">Why do you want to join BanaviAeBrand?&nbsp;*</label>
           <textarea 
             name="whyJoin"
             required
@@ -249,7 +249,7 @@ export default function RegistrationForm() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           <div>
-            <label className="block text-sm font-bold text-white mb-1 uppercase tracking-wider">Current Social Media Exp *</label>
+            <label className="block text-sm font-bold text-white mb-1 uppercase tracking-wider">Current Social Media Exp&nbsp;*</label>
             <select 
               name="socialExperience"
               required
@@ -265,7 +265,7 @@ export default function RegistrationForm() {
           </div>
 
           <div>
-            <label className="block text-sm font-bold text-white mb-1 uppercase tracking-wider">Have you edited Reels before? *</label>
+            <label className="block text-sm font-bold text-white mb-1 uppercase tracking-wider">Have you edited Reels before?&nbsp;*</label>
             <select 
               name="editingExperience"
               required
@@ -281,7 +281,7 @@ export default function RegistrationForm() {
         </div>
 
         <div>
-          <label className="block text-sm font-bold text-white mb-1 uppercase tracking-wider">How did you hear about BanaviAeBrand? *</label>
+          <label className="block text-sm font-bold text-white mb-1 uppercase tracking-wider">How did you hear about BanaviAeBrand?&nbsp;*</label>
           <input 
             type="text" 
             name="source"
@@ -304,7 +304,7 @@ export default function RegistrationForm() {
             className="mt-1 w-5 h-5 rounded border-white/10 text-[#3B82F6] focus:ring-[#3B82F6] bg-[#101018]"
           />
           <label htmlFor="participationAgreement" className="text-sm text-white/60 cursor-pointer">
-            I understand that BanaviAeBrand is a practical execution workshop, not just a lecture. I am willing to participate actively for the full day. *
+            I understand that BanaviAeBrand is a practical execution workshop, not just a lecture. I am willing to participate actively for the full day.&nbsp;*
           </label>
         </div>
 

@@ -28,8 +28,8 @@ export default function DeliveredMetrics() {
       icon: <Zap className="w-5 h-5 text-[#F59E0B]" />,
     },
     {
-      value: "1",
-      unit: "REEL",
+      value: "30",
+      unit: "REELS",
       label: "Finished Product",
       icon: <Play className="w-5 h-5 text-[#8B5CF6]" />,
     },
