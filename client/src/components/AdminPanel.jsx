@@ -15,10 +15,17 @@ export default function AdminPanel() {
   const [loadingWorkshops, setLoadingWorkshops] = useState(true);
   const [newWorkshop, setNewWorkshop] = useState({ date: '', location: '', maxSlots: 30 });
 
+  // Auth state
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+
   useEffect(() => {
-    fetchRegistrations();
-    fetchWorkshops();
-  }, []);
+    if (isAuthenticated) {
+      fetchRegistrations();
+      fetchWorkshops();
+    }
+  }, [isAuthenticated]);
 
   const fetchRegistrations = async () => {
     try {
@@ -89,6 +96,49 @@ export default function AdminPanel() {
     r.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
     r.phone.includes(searchTerm)
   );
+
+  const handleLogin = (e) => {
+    e.preventDefault();
+    if (password === 'Action30') {
+      setIsAuthenticated(true);
+      setError('');
+    } else {
+      setError('Incorrect password');
+    }
+  };
+
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-[#050507] text-white flex items-center justify-center p-6">
+        <div className="w-full max-w-md bg-[#101018] rounded-3xl p-8 border border-white/10 shadow-2xl">
+          <div className="text-center mb-8">
+            <h2 className="text-3xl font-black text-white uppercase tracking-tight">Admin Access</h2>
+            <p className="text-white/60 mt-2 text-sm">Enter password to view registrations</p>
+          </div>
+          
+          <form onSubmit={handleLogin} className="space-y-6">
+            <div>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Password"
+                className="w-full px-4 py-3 bg-black border border-white/10 rounded-xl text-white focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6] outline-none transition-all"
+                autoFocus
+              />
+              {error && <p className="text-red-400 text-xs mt-2 font-bold">{error}</p>}
+            </div>
+            <button 
+              type="submit"
+              className="w-full py-3 bg-[#3B82F6] text-black font-black uppercase tracking-wider rounded-xl hover:bg-[#2563EB] transition-colors shadow-[0_0_20px_rgba(59,130,246,0.3)]"
+            >
+              Unlock Dashboard
+            </button>
+          </form>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#050507] text-white p-8 pt-24">
