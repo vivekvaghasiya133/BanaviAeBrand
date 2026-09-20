@@ -30,7 +30,8 @@ export default function AboutTeam() {
         "Social media isn't just about posting content. It's about psychology, strategy, and execution.",
       ],
       quote: "We don't need more people watching tutorials. We need more people creating.",
-      instagram: 'https://www.instagram.com/vivek.socialflipss'
+      instagram: 'https://www.instagram.com/vivek.socialflipss',
+      image: '/vivek.jpg'
     },
     {
       id: 2,
@@ -44,7 +45,8 @@ export default function AboutTeam() {
         "A viral video starts long before you press record. It starts with the hook and the deep research behind it.",
       ],
       quote: "Don't let them scroll. Give them a reason to stay.",
-      instagram: 'https://www.instagram.com/mr_talaviya'
+      instagram: 'https://www.instagram.com/mr_talaviya',
+      image: '/jaydip.jpg'
     },
     {
       id: 4,
