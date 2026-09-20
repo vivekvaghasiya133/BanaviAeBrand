@@ -4,6 +4,21 @@ import { ArrowUpRight } from 'lucide-react';
 export default function AboutTeam() {
   const team = [
     {
+      id: 3,
+      firstName: 'MANTHAN',
+      lastName: 'DONGA',
+      role: 'Coordinator',
+      initials: 'MD',
+      color: '#F97316',
+      gradient: 'from-[#F97316] to-red-500',
+      bio: [
+        "Execution requires structure. Behind every successful shoot and viral campaign is flawless logistics and coordination.",
+      ],
+      quote: "Seamless execution is the backbone of viral content.",
+      instagram: 'https://www.instagram.com/md.donga',
+      image: '/manthan.jpg'
+    },
+    {
       id: 1,
       firstName: 'VIVEK',
       lastName: 'VAGHASIYA',
@@ -30,21 +45,6 @@ export default function AboutTeam() {
       ],
       quote: "Don't let them scroll. Give them a reason to stay.",
       instagram: 'https://www.instagram.com/mr_talaviya'
-    },
-    {
-      id: 3,
-      firstName: 'MANTHAN',
-      lastName: 'DONGA',
-      role: 'Coordinator',
-      initials: 'MD',
-      color: '#F97316',
-      gradient: 'from-[#F97316] to-red-500',
-      bio: [
-        "Execution requires structure. Behind every successful shoot and viral campaign is flawless logistics and coordination.",
-      ],
-      quote: "Seamless execution is the backbone of viral content.",
-      instagram: 'https://www.instagram.com/md.donga',
-      image: '/manthan.jpg'
     },
     {
       id: 4,
