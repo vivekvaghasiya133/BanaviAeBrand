@@ -17,7 +17,7 @@ export default function AboutTeam() {
       quote: "Seamless execution is the backbone of viral content.",
       instagram: 'https://www.instagram.com/md.donga',
       image: '/manthan.jpg',
-      imageClass: 'object-top'
+      imageClass: 'scale-[1.15] object-[50%_15%]'
     },
     {
       id: 1,
@@ -32,7 +32,8 @@ export default function AboutTeam() {
       ],
       quote: "We don't need more people watching tutorials. We need more people creating.",
       instagram: 'https://www.instagram.com/vivek.socialflipss',
-      image: '/vivek.jpg'
+      image: '/vivek.jpg',
+      imageClass: 'scale-[1.35] object-center'
     },
     {
       id: 2,
