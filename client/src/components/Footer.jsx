@@ -129,6 +129,8 @@ export default function Footer({ onOpenOnboarding }) {
             </div>
           </div>
 
+        </div>
+
         {/* Bottom Copyright Bar */}
         <div className="pt-8 border-t border-white/[0.08] flex flex-col sm:flex-row items-center justify-between text-xs text-white/40 gap-4">
           <div>
