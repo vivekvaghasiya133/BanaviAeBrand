@@ -33,7 +33,7 @@ export default function AboutTeam() {
       quote: "We don't need more people watching tutorials. We need more people creating.",
       instagram: 'https://www.instagram.com/vivek.socialflipss',
       image: '/vivek.jpg',
-      imageClass: 'scale-[1.35] object-[50%_70%]'
+      imageClass: 'scale-[1.35] object-[50%_20%]'
     },
     {
       id: 2,
