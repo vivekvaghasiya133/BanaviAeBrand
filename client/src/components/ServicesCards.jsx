@@ -73,10 +73,13 @@ export default function ServicesCards({ onOpenOnboarding }) {
               Who is this for?
             </p>
             <div
-              className="text-[clamp(2.5rem,5vw,5rem)] font-black text-white leading-[0.9]"
+              className="text-[clamp(2.5rem,5vw,5rem)] font-black text-white leading-[0.9] flex flex-wrap gap-x-4 md:gap-x-8 gap-y-2"
               aria-label="WHO IS THIS EXPERIENCE FOR?"
             >
-              W H O &nbsp; I S &nbsp; I T &nbsp; F O R ?
+              <span className="whitespace-nowrap">W H O</span>
+              <span className="whitespace-nowrap">I S</span>
+              <span className="whitespace-nowrap">I T</span>
+              <span className="whitespace-nowrap">F O R ?</span>
             </div>
           </div>
           <div className="md:text-right">
