@@ -16,7 +16,8 @@ export default function AboutTeam() {
       ],
       quote: "Seamless execution is the backbone of viral content.",
       instagram: 'https://www.instagram.com/md.donga',
-      image: '/manthan.jpg'
+      image: '/manthan.jpg',
+      imageClass: 'object-top'
     },
     {
       id: 1,
@@ -93,7 +94,7 @@ export default function AboutTeam() {
                 ></div>
 
                 {trainer.image ? (
-                  <img src={trainer.image} alt={trainer.firstName} className="w-full h-full object-cover relative z-0" />
+                  <img src={trainer.image} alt={trainer.firstName} className={`w-full h-full object-cover relative z-0 ${trainer.imageClass || ''}`} />
                 ) : (
                   <div className="absolute inset-0 flex flex-col items-center justify-center z-0">
                     <div className="w-20 h-20 bg-[#101018] border border-white/10 rounded-full flex items-center justify-center mb-4 shadow-xl">
