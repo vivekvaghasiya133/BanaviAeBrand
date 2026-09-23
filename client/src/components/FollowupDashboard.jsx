@@ -20,8 +20,7 @@ export default function FollowupDashboard({ registrations, fetchRegistrations })
   const getOutcomeColor = (outcome) => {
     switch(outcome) {
       case 'Call Again': return 'bg-blue-500/10 text-blue-500 border-blue-500/20';
-      case 'Demo Schedule': return 'bg-purple-500/10 text-purple-500 border-purple-500/20';
-      case 'Setup': return 'bg-indigo-500/10 text-indigo-500 border-indigo-500/20';
+      case 'Pending Lead': return 'bg-purple-500/10 text-purple-500 border-purple-500/20';
       case 'Client Done': return 'bg-green-500/10 text-green-500 border-green-500/20';
       case 'Not Interested': return 'bg-red-500/10 text-red-500 border-red-500/20';
       case 'No Answer / Busy': return 'bg-orange-500/10 text-orange-500 border-orange-500/20';
@@ -32,8 +31,7 @@ export default function FollowupDashboard({ registrations, fetchRegistrations })
   const getOutcomeIcon = (outcome) => {
     switch(outcome) {
       case 'Call Again': return <Phone size={14} />;
-      case 'Demo Schedule': return <Calendar size={14} />;
-      case 'Setup': return <CheckCircle size={14} />;
+      case 'Pending Lead': return <Clock size={14} />;
       case 'Client Done': return <CheckCircle size={14} />;
       case 'Not Interested': return <XCircle size={14} />;
       case 'No Answer / Busy': return <Clock size={14} />;
@@ -72,7 +70,7 @@ export default function FollowupDashboard({ registrations, fetchRegistrations })
   const totalScanned = registrations.length;
   const todayCount = registrations.filter(r => r.latestNextFollowUpDate && r.latestNextFollowUpDate.toLowerCase().includes('today')).length;
   const overdueCount = registrations.filter(r => r.latestNextFollowUpDate && r.latestNextFollowUpDate.toLowerCase().includes('overdue')).length;
-  const demoCount = registrations.filter(r => r.latestOutcome === 'Demo Schedule').length;
+  const pendingLeadCount = registrations.filter(r => r.latestOutcome === 'Pending Lead').length;
   const notInterestedCount = registrations.filter(r => r.latestOutcome === 'Not Interested').length;
   const pendingCount = registrations.filter(r => !r.latestOutcome || r.latestOutcome === 'Pending').length;
 
@@ -82,9 +80,8 @@ export default function FollowupDashboard({ registrations, fetchRegistrations })
     
     if (filterMode === 'All') return true;
     if (filterMode === 'Not Interested' && r.latestOutcome === 'Not Interested') return true;
-    if (filterMode === 'Demo Scheduled' && r.latestOutcome === 'Demo Schedule') return true;
+    if (filterMode === 'Pending Lead' && r.latestOutcome === 'Pending Lead') return true;
     if (filterMode === 'Client Done' && r.latestOutcome === 'Client Done') return true;
-    if (filterMode === 'Setup' && r.latestOutcome === 'Setup') return true;
     if (filterMode === 'Today' && r.latestNextFollowUpDate?.toLowerCase().includes('today')) return true;
     if (filterMode === 'Overdue' && r.latestNextFollowUpDate?.toLowerCase().includes('overdue')) return true;
     
@@ -107,8 +104,8 @@ export default function FollowupDashboard({ registrations, fetchRegistrations })
           <div className="text-xs font-bold text-red-600/70 uppercase tracking-wider mt-1">Overdue Calls</div>
         </div>
         <div className="bg-purple-50 rounded-xl p-4 border border-purple-200 shadow-sm flex flex-col justify-center">
-          <div className="text-3xl font-black text-purple-700">{demoCount}</div>
-          <div className="text-xs font-bold text-purple-600/70 uppercase tracking-wider mt-1">Demos Scheduled</div>
+          <div className="text-3xl font-black text-purple-700">{pendingLeadCount}</div>
+          <div className="text-xs font-bold text-purple-600/70 uppercase tracking-wider mt-1">Pending Leads</div>
         </div>
         <div className="bg-rose-50 rounded-xl p-4 border border-rose-200 shadow-sm flex flex-col justify-center">
           <div className="text-3xl font-black text-rose-700">{notInterestedCount}</div>
@@ -150,8 +147,7 @@ export default function FollowupDashboard({ registrations, fetchRegistrations })
             { label: 'All', count: totalScanned, color: 'bg-emerald-700 text-white' },
             { label: 'Today', count: todayCount, icon: '📅', color: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
             { label: 'Overdue', count: overdueCount, icon: '🚨', color: 'bg-red-50 text-red-700 border-red-200' },
-            { label: 'Demo Scheduled', count: demoCount, icon: '📅', color: 'bg-purple-50 text-purple-700 border-purple-200' },
-            { label: 'Setup', count: registrations.filter(r => r.latestOutcome === 'Setup').length, icon: '🔧', color: 'bg-indigo-50 text-indigo-700 border-indigo-200' },
+            { label: 'Pending Lead', count: pendingLeadCount, icon: '⏳', color: 'bg-purple-50 text-purple-700 border-purple-200' },
             { label: 'Client Done', count: registrations.filter(r => r.latestOutcome === 'Client Done').length, icon: '🏆', color: 'bg-green-50 text-green-700 border-green-200' },
             { label: 'Not Interested', count: notInterestedCount, icon: '❌', color: 'bg-rose-50 text-rose-700 border-rose-200' },
           ].map(filter => (
@@ -352,8 +348,7 @@ export default function FollowupDashboard({ registrations, fetchRegistrations })
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   {[
                     { id: 'Call Again', title: 'Call Again', desc: 'Set callback date & time', icon: <Phone size={18}/>, color: 'text-blue-500' },
-                    { id: 'Demo Schedule', title: 'Demo Schedule', desc: 'Book product demo slot', icon: <Calendar size={18}/>, color: 'text-purple-500' },
-                    { id: 'Setup', title: 'Setup', desc: 'Onboarding / account setup', icon: <CheckCircle size={18}/>, color: 'text-indigo-500' },
+                    { id: 'Pending Lead', title: 'Pending Lead', desc: 'Lead is in pipeline', icon: <Clock size={18}/>, color: 'text-purple-500' },
                     { id: 'Client Done', title: 'Client Done', desc: 'Converted to paying client', icon: <CheckCircle size={18}/>, color: 'text-green-500' },
                     { id: 'Not Interested', title: 'Not Interested', desc: 'Closed / Lead uninterested', icon: <XCircle size={18}/>, color: 'text-red-500' },
                     { id: 'No Answer / Busy', title: 'No Answer / Busy', desc: 'No response or line busy', icon: <Clock size={18}/>, color: 'text-orange-500' },
