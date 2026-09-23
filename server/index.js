@@ -188,6 +188,35 @@ app.post('/api/register', async (req, res) => {
 
     console.log('🎉 New Registration:', newReg.name, 'for', targetWorkshop.date);
 
+    // Send WhatsApp Thank You message via Wababa API
+    try {
+      // Clean phone number (remove +, spaces, dashes)
+      let cleanPhone = phone.replace(/[\+\s\-]/g, '');
+      // Ensure it starts with 91 if it's a 10 digit Indian number
+      if (cleanPhone.length === 10) {
+        cleanPhone = '91' + cleanPhone;
+      }
+
+      await fetch('https://wababa.in/api/public/send', {
+        method: 'POST',
+        headers: {
+          'Authorization': 'Bearer wac_fe2814afc40ca8e732ccb2217e5da792386fc4e02b2ffaad',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          to: cleanPhone,
+          type: 'template',
+          templateName: 'welcome',
+          language: 'gu',
+          variables: [name] // Pass the lead's name as the variable
+        })
+      });
+      console.log('✅ WhatsApp Welcome message sent to:', cleanPhone);
+    } catch (whatsappErr) {
+      console.error('❌ Failed to send WhatsApp message:', whatsappErr);
+      // We don't want to fail the registration if WhatsApp fails, so just log it
+    }
+
     res.json({ 
       success: true, 
       data: {
