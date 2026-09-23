@@ -46,13 +46,17 @@ const registrationSchema = new mongoose.Schema({
   editingExperience: { type: String, required: true },
   participationAgreement: { type: Boolean, required: true },
   source: { type: String, required: true },
-  workshopId: { type: mongoose.Schema.Types.ObjectId, ref: 'Workshop', required: true },
-  workshopDate: { type: String },
-  // Follow-up Management Fields
-  status: { type: String, default: 'Pending' }, // 'Pending', 'Interested', 'Not Interested', 'Done'
-  assignedTo: { type: String, default: '' },
-  followUpDate: { type: String, default: '' },
-  notes: { type: String, default: '' },
+  // CRM Follow-up Management Fields
+  followUpHistory: [{
+    outcome: String,
+    callerName: String,
+    nextFollowUpDate: String,
+    note: String,
+    createdAt: { type: Date, default: Date.now }
+  }],
+  latestOutcome: { type: String, default: 'Pending' },
+  latestNextFollowUpDate: { type: String, default: '' },
+  latestCallerName: { type: String, default: '' },
   createdAt: { type: Date, default: Date.now }
 });
 
@@ -232,18 +236,33 @@ app.delete('/api/admin/registrations/:id', async (req, res) => {
   }
 });
 
-// Admin: Update Follow-up details for a registration
-app.put('/api/admin/registrations/:id/followup', async (req, res) => {
+// Admin: Add a Follow-up record
+app.post('/api/admin/registrations/:id/followups', async (req, res) => {
   try {
     if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
       return res.status(400).json({ success: false, error: 'Invalid ID format' });
     }
 
-    const { status, assignedTo, followUpDate, notes } = req.body;
+    const { outcome, callerName, nextFollowUpDate, note } = req.body;
+    
+    const newFollowUp = {
+      outcome,
+      callerName,
+      nextFollowUpDate,
+      note,
+      createdAt: new Date()
+    };
     
     const updatedReg = await Registration.findByIdAndUpdate(
       req.params.id,
-      { $set: { status, assignedTo, followUpDate, notes } },
+      { 
+        $push: { followUpHistory: newFollowUp },
+        $set: { 
+          latestOutcome: outcome,
+          latestNextFollowUpDate: nextFollowUpDate,
+          latestCallerName: callerName
+        }
+      },
       { new: true } // Return updated document
     );
 
@@ -253,7 +272,7 @@ app.put('/api/admin/registrations/:id/followup', async (req, res) => {
       res.status(404).json({ success: false, error: 'Registration not found' });
     }
   } catch (error) {
-    console.error('Error updating follow-up:', error);
+    console.error('Error adding follow-up:', error);
     res.status(500).json({ success: false, error: 'Server error' });
   }
 });

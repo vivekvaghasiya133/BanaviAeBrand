@@ -1,14 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Users, Search, Download, Trash2, Calendar, MapPin, Hash, Plus, PhoneCall, Edit2, X, Check } from 'lucide-react';
+import { Users, Search, Download, Trash2, Calendar, MapPin, Hash, Plus, PhoneCall } from 'lucide-react';
 import { API_URL } from '../config';
+import FollowupDashboard from './FollowupDashboard';
 
 export default function AdminPanel() {
   const [activeTab, setActiveTab] = useState('registrations'); // 'registrations' | 'workshops' | 'followups'
-  
-  // Followups State
-  const [followupFilter, setFollowupFilter] = useState('All'); // All, Pending, Interested, Not Interested, Done
-  const [editingFollowUpId, setEditingFollowUpId] = useState(null);
-  const [editForm, setEditForm] = useState({ status: 'Pending', assignedTo: '', followUpDate: '', notes: '' });
+
   // Registrations state
   const [registrations, setRegistrations] = useState([]);
   const [loadingRegs, setLoadingRegs] = useState(true);
@@ -70,30 +67,6 @@ export default function AdminPanel() {
     } catch (err) { console.error(err); }
   };
 
-  const handleEditClick = (reg) => {
-    setEditingFollowUpId(reg.id);
-    setEditForm({
-      status: reg.status || 'Pending',
-      assignedTo: reg.assignedTo || '',
-      followUpDate: reg.followUpDate || '',
-      notes: reg.notes || ''
-    });
-  };
-
-  const handleUpdateFollowUp = async (id) => {
-    try {
-      const res = await fetch(`${API_URL}/api/admin/registrations/${id}/followup`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(editForm)
-      });
-      const data = await res.json();
-      if (data.success) {
-        setRegistrations(registrations.map(r => r.id === id ? data.data : r));
-        setEditingFollowUpId(null);
-      }
-    } catch (err) { console.error(err); }
-  };
 
   const handleCreateWorkshop = async (e) => {
     e.preventDefault();
@@ -357,150 +330,7 @@ export default function AdminPanel() {
         )}
 
         {activeTab === 'followups' && (
-          <>
-            <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
-              <div className="flex gap-2">
-                {['All', 'Pending', 'Interested', 'Not Interested', 'Done'].map(status => (
-                  <button
-                    key={status}
-                    onClick={() => setFollowupFilter(status)}
-                    className={`px-4 py-2 rounded-lg text-sm font-bold transition-all border ${followupFilter === status ? 'bg-[#3B82F6] text-black border-[#3B82F6]' : 'bg-transparent text-white/60 border-white/10 hover:border-white/30'}`}
-                  >
-                    {status}
-                  </button>
-                ))}
-              </div>
-              <div className="relative flex-1 max-w-sm">
-                <Search className="w-5 h-5 absolute left-3 top-3 text-white/40" />
-                <input 
-                  type="text" 
-                  placeholder="Search name or phone..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 bg-[#101018] border border-white/10 rounded-xl text-white focus:ring-1 focus:ring-[#3B82F6] outline-none transition-all text-sm"
-                />
-              </div>
-            </div>
-
-            <div className="bg-[#101018] rounded-2xl shadow-xl border border-white/10 overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse">
-                  <thead>
-                    <tr className="bg-black/40 border-b border-white/5">
-                      <th className="p-4 font-bold text-white/50 text-xs uppercase tracking-wider">Lead Info</th>
-                      <th className="p-4 font-bold text-white/50 text-xs uppercase tracking-wider">Status</th>
-                      <th className="p-4 font-bold text-white/50 text-xs uppercase tracking-wider">Assigned To</th>
-                      <th className="p-4 font-bold text-white/50 text-xs uppercase tracking-wider">Follow Up Date</th>
-                      <th className="p-4 font-bold text-white/50 text-xs uppercase tracking-wider">Notes</th>
-                      <th className="p-4 font-bold text-white/50 text-xs uppercase tracking-wider text-right">Action</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-white/5">
-                    {loadingRegs ? (
-                      <tr><td colSpan="6" className="p-8 text-center text-white/40">Loading...</td></tr>
-                    ) : filteredRegistrations.filter(r => followupFilter === 'All' || (r.status || 'Pending') === followupFilter).length === 0 ? (
-                      <tr><td colSpan="6" className="p-8 text-center text-white/40">No leads found.</td></tr>
-                    ) : (
-                      filteredRegistrations
-                        .filter(r => followupFilter === 'All' || (r.status || 'Pending') === followupFilter)
-                        .map((reg) => (
-                          <tr key={reg.id} className="hover:bg-white/[0.02] transition-colors group">
-                            <td className="p-4">
-                              <div className="font-bold text-white">{reg.name}</div>
-                              <div className="text-sm text-[#3B82F6]">{reg.phone}</div>
-                            </td>
-                            {editingFollowUpId === reg.id ? (
-                              <td colSpan="5" className="p-4 bg-black/50">
-                                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
-                                  <div>
-                                    <label className="block text-xs font-bold text-white/50 mb-1">Status</label>
-                                    <select 
-                                      value={editForm.status} 
-                                      onChange={e => setEditForm({...editForm, status: e.target.value})}
-                                      className="w-full bg-[#101018] border border-white/20 text-white rounded-lg p-2 text-sm focus:border-[#3B82F6] outline-none"
-                                    >
-                                      <option>Pending</option>
-                                      <option>Interested</option>
-                                      <option>Not Interested</option>
-                                      <option>Done</option>
-                                    </select>
-                                  </div>
-                                  <div>
-                                    <label className="block text-xs font-bold text-white/50 mb-1">Assigned To</label>
-                                    <input 
-                                      type="text" 
-                                      value={editForm.assignedTo} 
-                                      onChange={e => setEditForm({...editForm, assignedTo: e.target.value})}
-                                      placeholder="e.g. Kuldeep"
-                                      className="w-full bg-[#101018] border border-white/20 text-white rounded-lg p-2 text-sm focus:border-[#3B82F6] outline-none"
-                                    />
-                                  </div>
-                                  <div>
-                                    <label className="block text-xs font-bold text-white/50 mb-1">Date / Time</label>
-                                    <input 
-                                      type="text" 
-                                      value={editForm.followUpDate} 
-                                      onChange={e => setEditForm({...editForm, followUpDate: e.target.value})}
-                                      placeholder="e.g. Tomorrow 10 AM"
-                                      className="w-full bg-[#101018] border border-white/20 text-white rounded-lg p-2 text-sm focus:border-[#3B82F6] outline-none"
-                                    />
-                                  </div>
-                                  <div>
-                                    <label className="block text-xs font-bold text-white/50 mb-1">Notes</label>
-                                    <input 
-                                      type="text" 
-                                      value={editForm.notes} 
-                                      onChange={e => setEditForm({...editForm, notes: e.target.value})}
-                                      placeholder="Remarks..."
-                                      className="w-full bg-[#101018] border border-white/20 text-white rounded-lg p-2 text-sm focus:border-[#3B82F6] outline-none"
-                                    />
-                                  </div>
-                                </div>
-                                <div className="mt-4 flex justify-end gap-2">
-                                  <button onClick={() => setEditingFollowUpId(null)} className="px-4 py-2 rounded-lg text-sm font-bold text-white/60 hover:bg-white/10 transition-colors">
-                                    Cancel
-                                  </button>
-                                  <button onClick={() => handleUpdateFollowUp(reg.id)} className="px-4 py-2 rounded-lg text-sm font-bold bg-[#3B82F6] text-black hover:bg-[#2563EB] transition-colors flex items-center gap-1">
-                                    <Check size={14} /> Save
-                                  </button>
-                                </div>
-                              </td>
-                            ) : (
-                              <>
-                                <td className="p-4">
-                                  <span className={`inline-block px-2.5 py-1 rounded-full text-xs font-bold border
-                                    ${(reg.status || 'Pending') === 'Pending' ? 'bg-orange-500/10 text-orange-400 border-orange-500/20' : 
-                                      reg.status === 'Interested' ? 'bg-green-500/10 text-green-400 border-green-500/20' :
-                                      reg.status === 'Not Interested' ? 'bg-red-500/10 text-red-400 border-red-500/20' :
-                                      'bg-blue-500/10 text-blue-400 border-blue-500/20'
-                                    }`}>
-                                    {reg.status || 'Pending'}
-                                  </span>
-                                </td>
-                                <td className="p-4">
-                                  <div className="text-sm text-white/80">{reg.assignedTo || '-'}</div>
-                                </td>
-                                <td className="p-4">
-                                  <div className={`text-sm ${reg.followUpDate ? 'text-white' : 'text-white/40'}`}>{reg.followUpDate || 'Not set'}</div>
-                                </td>
-                                <td className="p-4 max-w-[200px] truncate">
-                                  <div className="text-xs text-white/60" title={reg.notes}>{reg.notes || '-'}</div>
-                                </td>
-                                <td className="p-4 text-right">
-                                  <button onClick={() => handleEditClick(reg)} className="p-2 text-white/40 hover:text-white hover:bg-white/10 rounded-lg transition-colors">
-                                    <Edit2 className="w-4 h-4" />
-                                  </button>
-                                </td>
-                              </>
-                            )}
-                          </tr>
-                        ))
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </>
+          <FollowupDashboard registrations={registrations} fetchRegistrations={fetchRegistrations} />
         )}
       </div>
     </div>
