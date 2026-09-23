@@ -48,6 +48,11 @@ const registrationSchema = new mongoose.Schema({
   source: { type: String, required: true },
   workshopId: { type: mongoose.Schema.Types.ObjectId, ref: 'Workshop', required: true },
   workshopDate: { type: String },
+  // Follow-up Management Fields
+  status: { type: String, default: 'Pending' }, // 'Pending', 'Interested', 'Not Interested', 'Done'
+  assignedTo: { type: String, default: '' },
+  followUpDate: { type: String, default: '' },
+  notes: { type: String, default: '' },
   createdAt: { type: Date, default: Date.now }
 });
 
@@ -223,6 +228,32 @@ app.delete('/api/admin/registrations/:id', async (req, res) => {
     }
   } catch (error) {
     console.error('Error deleting registration:', error);
+    res.status(500).json({ success: false, error: 'Server error' });
+  }
+});
+
+// Admin: Update Follow-up details for a registration
+app.put('/api/admin/registrations/:id/followup', async (req, res) => {
+  try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ success: false, error: 'Invalid ID format' });
+    }
+
+    const { status, assignedTo, followUpDate, notes } = req.body;
+    
+    const updatedReg = await Registration.findByIdAndUpdate(
+      req.params.id,
+      { $set: { status, assignedTo, followUpDate, notes } },
+      { new: true } // Return updated document
+    );
+
+    if (updatedReg) {
+      res.json({ success: true, data: { ...updatedReg.toObject(), id: updatedReg._id.toString() } });
+    } else {
+      res.status(404).json({ success: false, error: 'Registration not found' });
+    }
+  } catch (error) {
+    console.error('Error updating follow-up:', error);
     res.status(500).json({ success: false, error: 'Server error' });
   }
 });
