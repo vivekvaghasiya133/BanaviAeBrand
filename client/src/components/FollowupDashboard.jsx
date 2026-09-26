@@ -3,7 +3,8 @@ import {
   Search, Download, Trash2, Calendar, Phone, MessageCircle, Clock, 
   CheckCircle, XCircle, Plus, ChevronDown, ChevronUp, X, RefreshCw, 
   Share2, Users, UserPlus, AlertCircle, Upload, Award, ArrowRightLeft, 
-  Tag, ChevronLeft, ChevronRight, CheckCircle2, PhoneCall, Sparkles, Filter
+  Tag, ChevronLeft, ChevronRight, CheckCircle2, PhoneCall, Sparkles, Filter,
+  Crown, User
 } from 'lucide-react';
 import { API_URL } from '../config';
 import BulkImportModal from './BulkImportModal';
@@ -112,11 +113,14 @@ export default function FollowupDashboard({
   fetchRegistrations, 
   activeCategory = 'original', 
   setActiveCategory,
-  workshops = []
+  workshops = [],
+  activeCaller = 'Vivek',
+  setActiveCaller
 }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterMode, setFilterMode] = useState('All'); 
   const [selectedTagFilter, setSelectedTagFilter] = useState('All');
+  const [selectedAdminFilter, setSelectedAdminFilter] = useState('All');
   
   const [expandedLeadId, setExpandedLeadId] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -135,10 +139,11 @@ export default function FollowupDashboard({
     setTimeout(() => setToast(null), 3500);
   };
   
-  // Follow-up form
+  // Follow-up form with active caller persistence and assignedAdmin
   const [form, setForm] = useState({
-    callerName: '',
+    callerName: activeCaller || localStorage.getItem('crm_active_caller') || 'Vivek',
     outcome: 'Call Again',
+    assignedAdmin: 'Vivek',
     nextFollowUpDate: '',
     note: ''
   });
@@ -155,8 +160,9 @@ export default function FollowupDashboard({
     interestArea: 'Personal Brand',
     source: activeCategory === 'coldcall' ? 'Cold Call Manual' : 'Manual Entry',
     leadType: activeCategory === 'coldcall' ? 'coldcall' : 'original',
-    callerName: '',
+    callerName: activeCaller || localStorage.getItem('crm_active_caller') || 'Vivek',
     outcome: 'Call Again',
+    assignedAdmin: 'Vivek',
     nextFollowUpDate: '',
     note: ''
   });
@@ -167,13 +173,14 @@ export default function FollowupDashboard({
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 50;
 
-  // Reset page when switching category, tag, or search
+  // Reset page when switching category, tag, admin, or search
   const handleCategorySwitch = (cat) => {
     if (setActiveCategory) {
       setActiveCategory(cat);
     }
     setCurrentPage(1);
     setSelectedTagFilter('All');
+    setSelectedAdminFilter('All');
   };
 
   const getOutcomeColor = (outcome) => {
@@ -183,6 +190,7 @@ export default function FollowupDashboard({
       case 'Client Done': return 'bg-green-500/10 text-green-600 border-green-500/20';
       case 'Not Interested': return 'bg-red-500/10 text-red-600 border-red-500/20';
       case 'No Answer / Busy': return 'bg-orange-500/10 text-orange-600 border-orange-500/20';
+      case 'Admin Call': return 'bg-amber-500/15 text-amber-800 border-amber-500/30';
       default: return 'bg-gray-500/10 text-gray-600 border-gray-500/20';
     }
   };
@@ -194,15 +202,18 @@ export default function FollowupDashboard({
       case 'Client Done': return <CheckCircle size={14} />;
       case 'Not Interested': return <XCircle size={14} />;
       case 'No Answer / Busy': return <Clock size={14} />;
+      case 'Admin Call': return <Crown size={14} className="text-amber-600" />;
       default: return <Phone size={14} />;
     }
   };
 
   const handleOpenModal = (lead) => {
     setSelectedLead(lead);
+    const currentActive = activeCaller || localStorage.getItem('crm_active_caller') || lead.latestCallerName || 'Vivek';
     setForm({
-      callerName: lead.latestCallerName || '',
+      callerName: currentActive,
       outcome: lead.latestOutcome && lead.latestOutcome !== 'Pending' ? lead.latestOutcome : 'Call Again',
+      assignedAdmin: lead.assignedAdmin || 'Vivek',
       nextFollowUpDate: '',
       note: ''
     });
@@ -219,7 +230,11 @@ export default function FollowupDashboard({
       });
       if (res.ok) {
         setIsModalOpen(false);
-        showToast(`Follow-up saved for ${selectedLead.name}`);
+        if (form.outcome === 'Admin Call') {
+          showToast(`👑 Assigned to ${form.assignedAdmin || 'Admin'} for Admin Call!`, 'warning');
+        } else {
+          showToast(`Follow-up saved for ${selectedLead.name}`);
+        }
         fetchRegistrations();
       }
     } catch (err) {
@@ -379,6 +394,7 @@ export default function FollowupDashboard({
         ...reg,
         leadType: reg.leadType || 'original',
         tag: reg.tag || '',
+        assignedAdmin: reg.assignedAdmin || '',
         followUpInfo
       };
     });
@@ -386,10 +402,11 @@ export default function FollowupDashboard({
 
   // Overall counts for category tabs
   const categoryCounts = useMemo(() => {
-    const original = enrichedRegistrations.filter(r => r.leadType === 'original').length;
-    const coldcall = enrichedRegistrations.filter(r => r.leadType === 'coldcall').length;
+    const original = enrichedRegistrations.filter(r => r.leadType === 'original' && r.latestOutcome !== 'Admin Call').length;
+    const coldcall = enrichedRegistrations.filter(r => r.leadType === 'coldcall' && r.latestOutcome !== 'Admin Call').length;
     const confirmed = enrichedRegistrations.filter(r => r.leadType === 'confirmed').length;
-    return { original, coldcall, confirmed, total: enrichedRegistrations.length };
+    const admincall = enrichedRegistrations.filter(r => r.latestOutcome === 'Admin Call').length;
+    return { original, coldcall, confirmed, admincall, total: enrichedRegistrations.length };
   }, [enrichedRegistrations]);
 
   // Unique tags for coldcall leads
@@ -414,11 +431,31 @@ export default function FollowupDashboard({
     return counts;
   }, [enrichedRegistrations]);
 
-  // Filter leads based on activeCategory, tag, search, and status
+  // Admin breakdown counts for Admin Call queue
+  const adminCounts = useMemo(() => {
+    const counts = { Vivek: 0, Manthan: 0, Jaydeep: 0, Kuldeep: 0 };
+    enrichedRegistrations.forEach(r => {
+      if (r.latestOutcome === 'Admin Call' && r.assignedAdmin) {
+        counts[r.assignedAdmin] = (counts[r.assignedAdmin] || 0) + 1;
+      }
+    });
+    return counts;
+  }, [enrichedRegistrations]);
+
+  // Filter leads based on activeCategory, tag, search, admin, and status
   const filteredLeads = useMemo(() => {
     return enrichedRegistrations.filter(r => {
       // 1. Matches Category
-      if (r.leadType !== activeCategory) return false;
+      if (activeCategory === 'admincall') {
+        if (r.latestOutcome !== 'Admin Call') return false;
+        if (selectedAdminFilter !== 'All' && r.assignedAdmin !== selectedAdminFilter) return false;
+      } else if (activeCategory === 'original') {
+        if (r.leadType !== 'original' || r.latestOutcome === 'Admin Call') return false;
+      } else if (activeCategory === 'coldcall') {
+        if (r.leadType !== 'coldcall' || r.latestOutcome === 'Admin Call') return false;
+      } else if (activeCategory === 'confirmed') {
+        if (r.leadType !== 'confirmed') return false;
+      }
 
       // 2. Matches Tag (for coldcall)
       if (activeCategory === 'coldcall' && selectedTagFilter !== 'All') {
@@ -434,6 +471,7 @@ export default function FollowupDashboard({
           (r.tag || '').toLowerCase().includes(search) ||
           (r.city || '').toLowerCase().includes(search) ||
           (r.profession || '').toLowerCase().includes(search) ||
+          (r.assignedAdmin || '').toLowerCase().includes(search) ||
           (r.latestCallerName || '').toLowerCase().includes(search);
         if (!matches) return false;
       }
@@ -448,18 +486,28 @@ export default function FollowupDashboard({
       
       return false;
     });
-  }, [enrichedRegistrations, activeCategory, selectedTagFilter, searchTerm, filterMode]);
+  }, [enrichedRegistrations, activeCategory, selectedTagFilter, selectedAdminFilter, searchTerm, filterMode]);
 
   // Category specific stats
   const categoryStats = useMemo(() => {
-    const list = enrichedRegistrations.filter(r => r.leadType === activeCategory);
+    let list = [];
+    if (activeCategory === 'admincall') {
+      list = enrichedRegistrations.filter(r => r.latestOutcome === 'Admin Call');
+    } else if (activeCategory === 'original') {
+      list = enrichedRegistrations.filter(r => r.leadType === 'original' && r.latestOutcome !== 'Admin Call');
+    } else if (activeCategory === 'coldcall') {
+      list = enrichedRegistrations.filter(r => r.leadType === 'coldcall' && r.latestOutcome !== 'Admin Call');
+    } else {
+      list = enrichedRegistrations.filter(r => r.leadType === 'confirmed');
+    }
+
     return {
       total: list.length,
       today: list.filter(r => r.followUpInfo.isToday).length,
       overdue: list.filter(r => r.followUpInfo.isOverdue).length,
       pendingLead: list.filter(r => r.latestOutcome === 'Pending Lead').length,
       notInterested: list.filter(r => r.latestOutcome === 'Not Interested').length,
-      pendingCall: list.filter(r => !r.latestOutcome || r.latestOutcome === 'Pending' || r.latestOutcome === 'Call Again').length,
+      pendingCall: list.filter(r => !r.latestOutcome || r.latestOutcome === 'Pending' || r.latestOutcome === 'Call Again' || r.latestOutcome === 'Admin Call').length,
       done: list.filter(r => r.latestOutcome === 'Client Done').length
     };
   }, [enrichedRegistrations, activeCategory]);
@@ -561,6 +609,24 @@ export default function FollowupDashboard({
               {categoryCounts.confirmed}
             </span>
           </button>
+
+          {/* Admin Calls Tab (Next to Confirmed Leads) */}
+          <button
+            onClick={() => handleCategorySwitch('admincall')}
+            className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 rounded-lg font-black text-xs sm:text-sm transition-all cursor-pointer ${
+              activeCategory === 'admincall'
+                ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-black shadow-md'
+                : 'text-amber-800 hover:text-amber-950 hover:bg-amber-50/80 border border-amber-300/50'
+            }`}
+          >
+            <Crown size={16} className={activeCategory === 'admincall' ? 'text-black' : 'text-amber-600'} />
+            <span>Admin Calls</span>
+            <span className={`px-2 py-0.5 rounded-full text-xs font-black ${
+              activeCategory === 'admincall' ? 'bg-black/25 text-black' : 'bg-amber-200 text-amber-950'
+            }`}>
+              {categoryCounts.admincall}
+            </span>
+          </button>
         </div>
 
         {/* Category Header Label */}
@@ -568,6 +634,7 @@ export default function FollowupDashboard({
           {activeCategory === 'original' && '📥 Inbound Website Leads & Direct Applications'}
           {activeCategory === 'coldcall' && '📞 Outbound Calling Database & Bulk Leads'}
           {activeCategory === 'confirmed' && '🏆 Finalized Students & Course Enrollments'}
+          {activeCategory === 'admincall' && '👑 Priority Calls Assigned to Admins (Vivek, Manthan, Jaydeep, Kuldeep)'}
         </div>
       </div>
 
@@ -576,7 +643,7 @@ export default function FollowupDashboard({
         <div className="bg-white rounded-xl p-4 border border-blue-200 shadow-sm flex flex-col justify-center">
           <div className="text-2xl sm:text-3xl font-black text-slate-800">{categoryStats.total.toLocaleString()}</div>
           <div className="text-[11px] font-bold text-slate-500 uppercase tracking-wider mt-1">
-            {activeCategory === 'coldcall' ? 'Total Cold Leads' : activeCategory === 'confirmed' ? 'Confirmed Students' : 'Total Original'}
+            {activeCategory === 'coldcall' ? 'Total Cold Leads' : activeCategory === 'confirmed' ? 'Confirmed Students' : activeCategory === 'admincall' ? 'Admin Calls Queue' : 'Total Original'}
           </div>
         </div>
         <div className="bg-green-50 rounded-xl p-4 border border-green-300 shadow-sm flex flex-col justify-center">
@@ -610,7 +677,7 @@ export default function FollowupDashboard({
           <div className="flex items-center gap-2 text-sm font-bold text-gray-700">
             <span className="flex items-center justify-center w-6 h-6 border border-gray-300 rounded bg-gray-50 text-xs">⛶</span>
             <span>
-              {activeCategory === 'coldcall' ? 'Cold Call Tele-calling' : activeCategory === 'confirmed' ? 'Confirmed Enrollments' : 'Original Leads CRM'}
+              {activeCategory === 'coldcall' ? 'Cold Call Tele-calling' : activeCategory === 'confirmed' ? 'Confirmed Enrollments' : activeCategory === 'admincall' ? 'Admin Priority Calling Queue' : 'Original Leads CRM'}
             </span>
             <span className="text-xs text-gray-400 font-normal">
               ({filteredLeads.length.toLocaleString()} leads matching filters)
@@ -692,6 +759,42 @@ export default function FollowupDashboard({
           </div>
         )}
 
+        {/* ── Admin Filter Pills (Only visible in Admin Calls view) ── */}
+        {activeCategory === 'admincall' && (
+          <div className="mb-4 pt-2 border-t border-gray-100">
+            <div className="flex items-center gap-2 mb-2 text-xs font-bold text-gray-500 uppercase tracking-wider">
+              <Crown size={13} className="text-amber-600" /> Filter by Admin Queue:
+            </div>
+            <div className="flex flex-wrap items-center gap-1.5 overflow-x-auto pb-1">
+              <button
+                onClick={() => { setSelectedAdminFilter('All'); setCurrentPage(1); }}
+                className={`px-3.5 py-1.5 rounded-full text-xs font-bold border transition-all cursor-pointer ${
+                  selectedAdminFilter === 'All'
+                    ? 'bg-amber-500 text-black border-amber-500 shadow-sm'
+                    : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100'
+                }`}
+              >
+                All Admins ({categoryCounts.admincall || 0})
+              </button>
+
+              {['Vivek', 'Manthan', 'Jaydeep', 'Kuldeep'].map(admin => (
+                <button
+                  key={admin}
+                  onClick={() => { setSelectedAdminFilter(admin); setCurrentPage(1); }}
+                  className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold border transition-all cursor-pointer ${
+                    selectedAdminFilter === admin
+                      ? 'bg-amber-500 text-black border-amber-500 shadow-sm ring-1 ring-amber-600'
+                      : 'bg-white text-gray-700 border-gray-200 hover:bg-amber-50'
+                  }`}
+                >
+                  <span>👑 {admin}</span>
+                  <span className="text-[10px] font-black opacity-80">({adminCounts[admin] || 0})</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* ── Status Filter Chips ── */}
         <div className="flex flex-wrap items-center gap-2 mb-4">
           {[
@@ -722,7 +825,7 @@ export default function FollowupDashboard({
           <Search className="absolute left-3 top-3 text-gray-400" size={16} />
           <input 
             type="text" 
-            placeholder={`Search ${activeCategory} leads by name, phone, tag, city, or caller...`}
+            placeholder={`Search ${activeCategory} leads by name, phone, tag, city, admin, or caller...`}
             value={searchTerm}
             onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }}
             className="w-full pl-9 pr-4 py-2.5 bg-gray-50/60 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:bg-white outline-none transition-all"
@@ -739,6 +842,12 @@ export default function FollowupDashboard({
               <th className="p-4 text-xs font-black text-gray-500 uppercase tracking-wider">Phone / WhatsApp</th>
               {activeCategory === 'coldcall' && (
                 <th className="p-4 text-xs font-black text-gray-500 uppercase tracking-wider">Tag / Industry</th>
+              )}
+              {activeCategory === 'admincall' && (
+                <>
+                  <th className="p-4 text-xs font-black text-amber-800 uppercase tracking-wider">Assigned Admin</th>
+                  <th className="p-4 text-xs font-black text-gray-500 uppercase tracking-wider">Assigned By</th>
+                </>
               )}
               {activeCategory === 'confirmed' ? (
                 <>
@@ -759,7 +868,7 @@ export default function FollowupDashboard({
           <tbody className="divide-y divide-gray-100">
             {paginatedLeads.length === 0 ? (
               <tr>
-                <td colSpan={activeCategory === 'coldcall' ? 7 : 6} className="p-16 text-center text-gray-400">
+                <td colSpan={activeCategory === 'coldcall' ? 7 : activeCategory === 'admincall' ? 8 : 6} className="p-16 text-center text-gray-400">
                   <div className="max-w-md mx-auto space-y-3">
                     <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto text-gray-400">
                       <Search size={22} />
@@ -768,6 +877,8 @@ export default function FollowupDashboard({
                     <p className="text-xs text-gray-400">
                       {activeCategory === 'coldcall' 
                         ? 'Click "+ Import Bulk Leads (6000+)" above to import from Excel or CSV!' 
+                        : activeCategory === 'admincall'
+                        ? 'Leads marked with "Admin Call" outcome will appear here for Vivek, Manthan, Jaydeep or Kuldeep.'
                         : 'No leads matching the current filter.'}
                     </p>
                   </div>
@@ -822,6 +933,33 @@ export default function FollowupDashboard({
                           <span className="text-xs text-gray-400 italic">No tag</span>
                         )}
                       </td>
+                    )}
+
+                    {/* Admin Call Specific Columns */}
+                    {activeCategory === 'admincall' && (
+                      <>
+                        <td className="p-4 align-top">
+                          <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-black border shadow-sm ${
+                            reg.assignedAdmin === 'Vivek' ? 'bg-blue-50 text-blue-900 border-blue-300' :
+                            reg.assignedAdmin === 'Manthan' ? 'bg-purple-50 text-purple-900 border-purple-300' :
+                            reg.assignedAdmin === 'Jaydeep' ? 'bg-emerald-50 text-emerald-900 border-emerald-300' :
+                            reg.assignedAdmin === 'Kuldeep' ? 'bg-orange-50 text-orange-900 border-orange-300' :
+                            'bg-amber-50 text-amber-900 border-amber-300'
+                          }`}>
+                            <Crown size={14} className="text-amber-600" />
+                            {reg.assignedAdmin || 'Unassigned'}
+                          </span>
+                        </td>
+                        <td className="p-4 align-top">
+                          <div className="text-xs font-bold text-gray-800 flex items-center gap-1">
+                            <Users size={12} className="text-gray-400" />
+                            {reg.latestCallerName || 'Caller'}
+                          </div>
+                          <div className="text-[10px] text-gray-400 mt-0.5">
+                            Source: {reg.leadType === 'coldcall' ? 'Cold Call' : 'Original Lead'}
+                          </div>
+                        </td>
+                      </>
                     )}
 
                     {/* Confirmed view columns */}
@@ -1212,34 +1350,74 @@ export default function FollowupDashboard({
                 <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">
                   Call Outcome
                 </label>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                   {[
                     { label: 'Call Again', color: 'border-blue-400 bg-blue-50 text-blue-800' },
                     { label: 'Pending Lead', color: 'border-purple-400 bg-purple-50 text-purple-800' },
                     { label: 'Client Done', color: 'border-green-400 bg-green-50 text-green-800' },
                     { label: 'Not Interested', color: 'border-red-400 bg-red-50 text-red-800' },
-                    { label: 'No Answer / Busy', color: 'border-orange-400 bg-orange-50 text-orange-800' }
+                    { label: 'No Answer / Busy', color: 'border-orange-400 bg-orange-50 text-orange-800' },
+                    { label: 'Admin Call', color: 'border-amber-400 bg-amber-50 text-amber-900' }
                   ].map(item => (
                     <button
                       key={item.label}
                       type="button"
                       onClick={() => setForm({ ...form, outcome: item.label })}
-                      className={`p-2.5 rounded-xl border text-xs font-bold text-left transition-all cursor-pointer ${
+                      className={`p-2.5 rounded-xl border text-xs font-bold text-left transition-all cursor-pointer flex items-center justify-between ${
                         form.outcome === item.label
                           ? `${item.color} shadow-sm ring-2 ring-offset-1 ring-blue-500`
                           : 'border-gray-200 bg-white text-gray-700 hover:bg-gray-50'
                       }`}
                     >
-                      {item.label}
+                      <span>{item.label}</span>
+                      {item.label === 'Admin Call' && <Crown size={13} className="text-amber-600" />}
                     </button>
                   ))}
                 </div>
               </div>
 
+              {/* Special Admin Call Selector Box */}
+              {form.outcome === 'Admin Call' && (
+                <div className="p-4 bg-amber-50/80 border-2 border-amber-300 rounded-2xl space-y-3 animate-fadeIn">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-black text-amber-950 uppercase tracking-wider flex items-center gap-1.5">
+                      <Crown size={15} className="text-amber-600" />
+                      Select Admin To Call (Escalation): <span className="text-red-500">*</span>
+                    </label>
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-200 text-amber-900">
+                      Director Queue
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                    {['Vivek', 'Manthan', 'Jaydeep', 'Kuldeep'].map(admin => (
+                      <button
+                        key={admin}
+                        type="button"
+                        onClick={() => setForm({ ...form, assignedAdmin: admin })}
+                        className={`py-2.5 px-3 rounded-xl font-black text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                          form.assignedAdmin === admin
+                            ? 'bg-amber-500 text-black shadow-md ring-2 ring-amber-600 scale-105'
+                            : 'bg-white text-gray-700 border border-amber-200 hover:bg-amber-100/50'
+                        }`}
+                      >
+                        👑 {admin}
+                      </button>
+                    ))}
+                  </div>
+                  <p className="text-[11px] text-amber-800">
+                    ⚡ This lead will immediately appear under the <strong>Admin Calls</strong> tab for <strong>{form.assignedAdmin || 'Admin'}</strong> to call.
+                  </p>
+                </div>
+              )}
+
               <div>
-                <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">
-                  Caller / Executive Name
-                </label>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider">
+                    Caller / Executive Name
+                  </label>
+                  <span className="text-[10px] text-gray-400">Current: {activeCaller}</span>
+                </div>
                 <input 
                   type="text"
                   value={form.callerName}
@@ -1247,6 +1425,22 @@ export default function FollowupDashboard({
                   placeholder="e.g. Pooja Ma'am, Admin"
                   className="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none"
                 />
+                <div className="flex flex-wrap gap-1.5 mt-2">
+                  {['Vivek', 'Manthan', 'Jaydeep', 'Kuldeep', 'Pooja Ma\'am'].map(name => (
+                    <button
+                      key={name}
+                      type="button"
+                      onClick={() => setForm({ ...form, callerName: name })}
+                      className={`text-[10px] font-bold px-2 py-0.5 rounded-lg border transition-colors cursor-pointer ${
+                        form.callerName === name
+                          ? 'bg-blue-600 text-white border-blue-600'
+                          : 'bg-gray-100 text-gray-600 border-gray-200 hover:bg-gray-200'
+                      }`}
+                    >
+                      {name}
+                    </button>
+                  ))}
+                </div>
               </div>
 
               <div>

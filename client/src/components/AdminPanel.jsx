@@ -1,15 +1,24 @@
 import React, { useState, useEffect } from 'react';
-import { Users, Search, Download, Trash2, Calendar, MapPin, Hash, Plus, PhoneCall, Award, CheckCircle2 } from 'lucide-react';
+import { Users, Search, Download, Trash2, Calendar, MapPin, Hash, Plus, PhoneCall, Award, CheckCircle2, Crown, User, RefreshCw } from 'lucide-react';
 import { API_URL } from '../config';
 import FollowupDashboard from './FollowupDashboard';
 
 export default function AdminPanel() {
-  const [activeTab, setActiveTab] = useState('original'); // 'original' | 'coldcall' | 'confirmed' | 'workshops'
+  const [activeTab, setActiveTab] = useState('original'); // 'original' | 'coldcall' | 'confirmed' | 'admincall' | 'workshops'
+
+  // Caller identity (persisted in localStorage)
+  const [activeCaller, setActiveCaller] = useState(() => {
+    return localStorage.getItem('crm_active_caller') || 'Vivek';
+  });
+  const [callerInput, setCallerInput] = useState(() => {
+    return localStorage.getItem('crm_active_caller') || 'Vivek';
+  });
+  const [isSwitchCallerOpen, setIsSwitchCallerOpen] = useState(false);
 
   // Registrations state
   const [registrations, setRegistrations] = useState([]);
   const [loadingRegs, setLoadingRegs] = useState(true);
-  const [leadCounts, setLeadCounts] = useState({ original: 0, coldcall: 0, confirmed: 0, total: 0 });
+  const [leadCounts, setLeadCounts] = useState({ original: 0, coldcall: 0, confirmed: 0, admincall: 0, total: 0 });
 
   // Workshops state
   const [workshops, setWorkshops] = useState([]);
@@ -93,6 +102,9 @@ export default function AdminPanel() {
   const handleLogin = (e) => {
     e.preventDefault();
     if (password === 'Action30') {
+      const chosenCaller = callerInput.trim() || 'Admin';
+      localStorage.setItem('crm_active_caller', chosenCaller);
+      setActiveCaller(chosenCaller);
       setIsAuthenticated(true);
       setError('');
     } else {
@@ -100,32 +112,82 @@ export default function AdminPanel() {
     }
   };
 
+  const handleSwitchCaller = (name) => {
+    const chosen = name.trim() || 'Admin';
+    localStorage.setItem('crm_active_caller', chosen);
+    setActiveCaller(chosen);
+    setCallerInput(chosen);
+    setIsSwitchCallerOpen(false);
+  };
+
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen bg-[#050507] text-white flex items-center justify-center p-6">
         <div className="w-full max-w-md bg-[#101018] rounded-3xl p-8 border border-white/10 shadow-2xl">
           <div className="text-center mb-8">
-            <h2 className="text-3xl font-black text-white uppercase tracking-tight">Admin Access</h2>
-            <p className="text-white/60 mt-2 text-sm">Enter password to unlock CRM Dashboard</p>
+            <div className="w-14 h-14 rounded-2xl bg-blue-500/20 text-[#3B82F6] flex items-center justify-center mx-auto mb-3 shadow-[0_0_25px_rgba(59,130,246,0.3)]">
+              <Crown size={28} />
+            </div>
+            <h2 className="text-2xl font-black text-white uppercase tracking-tight">Admin & Caller Access</h2>
+            <p className="text-white/60 mt-1 text-xs">Select your name to log follow-ups automatically</p>
           </div>
           
-          <form onSubmit={handleLogin} className="space-y-6">
+          <form onSubmit={handleLogin} className="space-y-5">
+            {/* Quick Caller Selection */}
             <div>
+              <label className="block text-xs font-bold text-white/70 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                <User size={13} className="text-[#3B82F6]" /> Who is working today?
+              </label>
+              <div className="grid grid-cols-2 gap-2 mb-2">
+                {['Vivek', 'Manthan', 'Jaydeep', 'Kuldeep', 'Pooja Ma\'am'].map((name) => (
+                  <button
+                    key={name}
+                    type="button"
+                    onClick={() => setCallerInput(name)}
+                    className={`py-2 px-3 rounded-xl font-black text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                      callerInput === name
+                        ? 'bg-[#3B82F6] text-black shadow-md scale-105'
+                        : 'bg-white/5 text-white/70 border border-white/10 hover:bg-white/10 hover:text-white'
+                    }`}
+                  >
+                    <span>👤 {name}</span>
+                  </button>
+                ))}
+              </div>
+              <input
+                type="text"
+                value={callerInput}
+                onChange={(e) => setCallerInput(e.target.value)}
+                placeholder="Or type custom caller name..."
+                required
+                className="w-full px-4 py-2.5 bg-black border border-white/10 rounded-xl text-white text-xs focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6] outline-none transition-all"
+              />
+              <span className="text-[10px] text-white/40 mt-1 block">
+                All your follow-ups will automatically be saved under this name.
+              </span>
+            </div>
+
+            {/* Password */}
+            <div>
+              <label className="block text-xs font-bold text-white/70 uppercase tracking-wider mb-2">
+                Security Password
+              </label>
               <input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="Password"
-                className="w-full px-4 py-3 bg-black border border-white/10 rounded-xl text-white focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6] outline-none transition-all"
+                placeholder="Enter password (Action30)"
+                className="w-full px-4 py-3 bg-black border border-white/10 rounded-xl text-white focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6] outline-none transition-all text-sm"
                 autoFocus
               />
               {error && <p className="text-red-400 text-xs mt-2 font-bold">{error}</p>}
             </div>
+
             <button 
               type="submit"
-              className="w-full py-3 bg-[#3B82F6] text-black font-black uppercase tracking-wider rounded-xl hover:bg-[#2563EB] transition-colors shadow-[0_0_20px_rgba(59,130,246,0.3)] cursor-pointer"
+              className="w-full py-3 bg-[#3B82F6] text-black font-black uppercase tracking-wider rounded-xl hover:bg-[#2563EB] transition-colors shadow-[0_0_20px_rgba(59,130,246,0.3)] cursor-pointer text-sm"
             >
-              Unlock Dashboard
+              Unlock Dashboard as {callerInput || 'User'}
             </button>
           </form>
         </div>
@@ -139,19 +201,40 @@ export default function AdminPanel() {
         
         {/* ── Top Header & Tab Buttons Switcher ── */}
         <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center mb-8 gap-6 border-b border-white/10 pb-6">
-          <div>
-            <h1 className="text-3xl sm:text-4xl font-black text-white tracking-tight uppercase flex items-center gap-3">
-              <span>Banavi<span className="text-[#3B82F6]">Ae</span>Brand</span>
-              <span className="text-sm font-bold px-3 py-1 rounded-full bg-blue-500/20 text-[#3B82F6] border border-blue-500/30">
-                CRM Portal
-              </span>
-            </h1>
-            <p className="text-white/60 text-xs sm:text-sm mt-1">
-              Lead Calling, Bulk Import (6,000+) & Course Enrollment System
-            </p>
+          <div className="flex flex-wrap items-center justify-between gap-4 w-full xl:w-auto">
+            <div>
+              <h1 className="text-3xl sm:text-4xl font-black text-white tracking-tight uppercase flex items-center gap-3">
+                <span>Banavi<span className="text-[#3B82F6]">Ae</span>Brand</span>
+                <span className="text-sm font-bold px-3 py-1 rounded-full bg-blue-500/20 text-[#3B82F6] border border-blue-500/30">
+                  CRM Portal
+                </span>
+              </h1>
+              <p className="text-white/60 text-xs sm:text-sm mt-1">
+                Lead Calling, Bulk Import (6,000+) & Admin Escalations
+              </p>
+            </div>
+
+            {/* Active Caller Badge with Instant Switch Button */}
+            <div className="flex items-center gap-2.5 px-4 py-2 rounded-2xl bg-[#101018] border border-white/10 shadow-lg">
+              <div className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_rgba(52,211,153,0.8)]" />
+              <div className="text-xs">
+                <span className="text-white/40 block text-[10px] uppercase font-bold tracking-wider">Logged In As</span>
+                <span className="font-extrabold text-white flex items-center gap-1.5">
+                  <User size={13} className="text-[#3B82F6]" />
+                  {activeCaller}
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsSwitchCallerOpen(true)}
+                className="ml-2 px-2.5 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-white/80 hover:text-white text-[11px] font-bold transition-all cursor-pointer border border-white/10"
+              >
+                Switch
+              </button>
+            </div>
           </div>
           
-          {/* Main 4 Switcher Buttons */}
+          {/* Main 5 Switcher Buttons */}
           <div className="flex flex-wrap items-center bg-[#101018] p-1.5 rounded-2xl border border-white/10 gap-1.5 shadow-xl w-full xl:w-auto">
             {/* 1. ORIGINAL LEADS BUTTON */}
             <button 
@@ -207,7 +290,25 @@ export default function AdminPanel() {
               </span>
             </button>
 
-            {/* 4. WORKSHOPS BUTTON */}
+            {/* 4. ADMIN CALLS BUTTON (Next to Confirmed Leads!) */}
+            <button 
+              onClick={() => setActiveTab('admincall')}
+              className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 sm:px-5 py-2.5 rounded-xl font-black text-xs sm:text-sm transition-all cursor-pointer ${
+                activeTab === 'admincall' 
+                  ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-black shadow-[0_0_20px_rgba(245,158,11,0.5)]' 
+                  : 'text-amber-400/80 hover:text-amber-300 hover:bg-amber-500/10 border border-amber-500/20'
+              }`}
+            >
+              <Crown size={16} className={activeTab === 'admincall' ? 'text-black' : 'text-amber-400'} /> 
+              <span>Admin Calls</span>
+              <span className={`px-2 py-0.5 rounded-full text-xs font-black ${
+                activeTab === 'admincall' ? 'bg-black/25 text-black' : 'bg-amber-500/20 text-amber-300'
+              }`}>
+                {leadCounts.admincall || 0}
+              </span>
+            </button>
+
+            {/* 5. WORKSHOPS BUTTON */}
             <button 
               onClick={() => setActiveTab('workshops')}
               className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 sm:px-5 py-2.5 rounded-xl font-black text-xs sm:text-sm transition-all cursor-pointer ${
@@ -227,14 +328,59 @@ export default function AdminPanel() {
           </div>
         </div>
 
+        {/* ── Caller Switcher Modal ── */}
+        {isSwitchCallerOpen && (
+          <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+            <div className="bg-[#101018] rounded-3xl p-6 border border-white/10 max-w-sm w-full shadow-2xl space-y-4">
+              <div className="flex items-center justify-between pb-3 border-b border-white/10">
+                <h3 className="font-bold text-white flex items-center gap-2 text-sm uppercase tracking-wider">
+                  <User size={16} className="text-[#3B82F6]" /> Switch Active Caller
+                </h3>
+                <button onClick={() => setIsSwitchCallerOpen(false)} className="text-white/40 hover:text-white text-sm font-bold">✕</button>
+              </div>
+              <p className="text-xs text-white/60">Choose who is logging calls right now:</p>
+              <div className="grid grid-cols-2 gap-2">
+                {['Vivek', 'Manthan', 'Jaydeep', 'Kuldeep', 'Pooja Ma\'am'].map((name) => (
+                  <button
+                    key={name}
+                    type="button"
+                    onClick={() => handleSwitchCaller(name)}
+                    className={`py-2 px-3 rounded-xl font-black text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                      activeCaller === name
+                        ? 'bg-[#3B82F6] text-black shadow-md'
+                        : 'bg-white/5 text-white/80 hover:bg-white/10 hover:text-white border border-white/10'
+                    }`}
+                  >
+                    👑 {name}
+                  </button>
+                ))}
+              </div>
+              <div className="pt-2">
+                <input
+                  type="text"
+                  placeholder="Or enter custom name..."
+                  className="w-full px-3 py-2 bg-black border border-white/10 rounded-xl text-white text-xs outline-none focus:border-[#3B82F6]"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && e.target.value.trim()) {
+                      handleSwitchCaller(e.target.value.trim());
+                    }
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* ── Tab Views ── */}
-        {(activeTab === 'original' || activeTab === 'coldcall' || activeTab === 'confirmed') && (
+        {(activeTab === 'original' || activeTab === 'coldcall' || activeTab === 'confirmed' || activeTab === 'admincall') && (
           <FollowupDashboard 
             registrations={registrations} 
             fetchRegistrations={fetchRegistrations} 
             activeCategory={activeTab} 
             setActiveCategory={setActiveTab}
             workshops={workshops}
+            activeCaller={activeCaller}
+            setActiveCaller={setActiveCaller}
           />
         )}
 

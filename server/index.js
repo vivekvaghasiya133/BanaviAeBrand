@@ -56,10 +56,12 @@ const registrationSchema = new mongoose.Schema({
   confirmedAt: { type: Date },
   confirmedCourse: { type: String, default: '' },
   confirmedNote: { type: String, default: '' },
+  assignedAdmin: { type: String, default: '', index: true },
   // CRM Follow-up Management Fields
   followUpHistory: [{
     outcome: String,
     callerName: String,
+    assignedAdmin: String,
     nextFollowUpDate: String,
     note: String,
     createdAt: { type: Date, default: Date.now }
@@ -243,15 +245,22 @@ app.post('/api/register', async (req, res) => {
 // Admin Routes for Registrations
 app.get('/api/admin/registrations', async (req, res) => {
   try {
-    const { leadType, tag, search } = req.query;
+    const { leadType, tag, search, assignedAdmin } = req.query;
     let query = {};
 
     if (leadType === 'original') {
       query.$or = [{ leadType: 'original' }, { leadType: { $exists: false } }, { leadType: null }];
+      query.latestOutcome = { $ne: 'Admin Call' };
     } else if (leadType === 'coldcall') {
       query.leadType = 'coldcall';
+      query.latestOutcome = { $ne: 'Admin Call' };
     } else if (leadType === 'confirmed') {
       query.leadType = 'confirmed';
+    } else if (leadType === 'admincall') {
+      query.latestOutcome = 'Admin Call';
+      if (assignedAdmin && assignedAdmin !== 'All') {
+        query.assignedAdmin = assignedAdmin;
+      }
     }
 
     if (tag && tag !== 'All') {
@@ -267,7 +276,9 @@ app.get('/api/admin/registrations', async (req, res) => {
           { phone: searchRegex },
           { email: searchRegex },
           { tag: searchRegex },
-          { city: searchRegex }
+          { city: searchRegex },
+          { assignedAdmin: searchRegex },
+          { latestCallerName: searchRegex }
         ]
       });
     }
@@ -278,7 +289,8 @@ app.get('/api/admin/registrations', async (req, res) => {
       ...r,
       id: r._id.toString(),
       leadType: r.leadType || 'original',
-      tag: r.tag || ''
+      tag: r.tag || '',
+      assignedAdmin: r.assignedAdmin || ''
     }));
     
     res.json({ success: true, data: formattedRegs });
@@ -291,20 +303,30 @@ app.get('/api/admin/registrations', async (req, res) => {
 // Admin: Get Lead Counts and Distinct Tags
 app.get('/api/admin/lead-counts', async (req, res) => {
   try {
-    const [original, coldcall, confirmed, total] = await Promise.all([
+    const [original, coldcall, confirmed, admincall, total] = await Promise.all([
       Registration.countDocuments({
-        $or: [{ leadType: 'original' }, { leadType: { $exists: false } }, { leadType: null }]
+        $or: [{ leadType: 'original' }, { leadType: { $exists: false } }, { leadType: null }],
+        latestOutcome: { $ne: 'Admin Call' }
       }),
-      Registration.countDocuments({ leadType: 'coldcall' }),
+      Registration.countDocuments({ leadType: 'coldcall', latestOutcome: { $ne: 'Admin Call' } }),
       Registration.countDocuments({ leadType: 'confirmed' }),
+      Registration.countDocuments({ latestOutcome: 'Admin Call' }),
       Registration.countDocuments({})
     ]);
+
+    const adminBreakdown = {
+      Manthan: await Registration.countDocuments({ latestOutcome: 'Admin Call', assignedAdmin: 'Manthan' }),
+      Vivek: await Registration.countDocuments({ latestOutcome: 'Admin Call', assignedAdmin: 'Vivek' }),
+      Jaydeep: await Registration.countDocuments({ latestOutcome: 'Admin Call', assignedAdmin: 'Jaydeep' }),
+      Kuldeep: await Registration.countDocuments({ latestOutcome: 'Admin Call', assignedAdmin: 'Kuldeep' }),
+    };
 
     const distinctTags = await Registration.distinct('tag', { leadType: 'coldcall', tag: { $ne: '' } });
 
     res.json({
       success: true,
-      counts: { original, coldcall, confirmed, total },
+      counts: { original, coldcall, confirmed, admincall, total },
+      adminBreakdown,
       tags: distinctTags.filter(Boolean)
     });
   } catch (error) {
@@ -605,25 +627,32 @@ app.post('/api/admin/registrations/:id/followups', async (req, res) => {
       return res.status(400).json({ success: false, error: 'Invalid ID format' });
     }
 
-    const { outcome, callerName, nextFollowUpDate, note } = req.body;
+    const { outcome, callerName, nextFollowUpDate, note, assignedAdmin } = req.body;
     
     const newFollowUp = {
       outcome,
       callerName,
+      assignedAdmin: assignedAdmin || '',
       nextFollowUpDate,
       note,
       createdAt: new Date()
     };
     
+    const updateFields = {
+      latestOutcome: outcome,
+      latestNextFollowUpDate: nextFollowUpDate,
+      latestCallerName: callerName
+    };
+
+    if (assignedAdmin !== undefined) {
+      updateFields.assignedAdmin = assignedAdmin;
+    }
+
     const updatedReg = await Registration.findByIdAndUpdate(
       req.params.id,
       { 
         $push: { followUpHistory: newFollowUp },
-        $set: { 
-          latestOutcome: outcome,
-          latestNextFollowUpDate: nextFollowUpDate,
-          latestCallerName: callerName
-        }
+        $set: updateFields
       },
       { new: true } // Return updated document
     );
