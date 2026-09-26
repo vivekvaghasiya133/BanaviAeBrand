@@ -4,7 +4,6 @@ import { ChevronDown, Sparkles, ArrowRight, Menu, X, ExternalLink } from 'lucide
 export default function Navbar({ onOpenOnboarding }) {
   const [scrolled, setScrolled] = useState(false);
   const [servicesOpen, setServicesOpen] = useState(false);
-  const [casesOpen, setCasesOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [logoClicks, setLogoClicks] = useState(0);
   const [easterEggActive, setEasterEggActive] = useState(false);
@@ -36,21 +35,21 @@ export default function Navbar({ onOpenOnboarding }) {
     { title: 'Paid Ads', desc: 'Scaling with Meta Ads & high-ROI targeting', id: 'services' },
   ];
 
-  const caseStudiesList = [
-    { name: '@dr.remina', metric: '+417K followers', cat: 'Social Media · UGC' },
-    { name: 'Pongbot', metric: '5.2× ROAS', cat: 'Meta Ads · Creative' },
-    { name: 'Savants AI', metric: '320% Organic', cat: 'AI SEO · Dev' },
-    { name: 'Gateway Counseling', metric: '$120K grant', cat: 'Google Grants' },
-    { name: 'Slavista', metric: '0 → 1 Launch', cat: 'Branding & 3D' },
-  ];
-
   const handleBookSlot = (e) => {
     e?.preventDefault?.();
+    if (window.location.pathname !== '/') {
+      window.location.href = '/#register';
+      return;
+    }
     const el = document.getElementById('register');
     if (el) {
-      el.scrollIntoView({ behavior: 'smooth' });
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      setTimeout(() => {
+        const input = el.querySelector('input');
+        if (input) input.focus({ preventScroll: true });
+      }, 500);
     } else {
-      window.location.href = '#register';
+      window.location.hash = 'register';
     }
   };
 

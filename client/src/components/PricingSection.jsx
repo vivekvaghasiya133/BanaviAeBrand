@@ -51,10 +51,22 @@ export default function PricingSection() {
 
           <div className="text-center relative z-10">
             <button 
-              onClick={() => window.location.href = '#register'}
-              className="px-10 py-5 bg-[#3B82F6] text-black text-lg md:text-xl font-black rounded-xl hover:bg-[#2563EB] transition-colors uppercase tracking-wider w-full md:w-auto shadow-[0_0_30px_rgba(59,130,246,0.3)] hover:scale-105 duration-300"
+              onClick={(e) => {
+                e?.preventDefault?.();
+                const el = document.getElementById('register');
+                if (el) {
+                  el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  setTimeout(() => {
+                    const input = el.querySelector('input');
+                    if (input) input.focus({ preventScroll: true });
+                  }, 500);
+                } else {
+                  window.location.href = '#register';
+                }
+              }}
+              className="px-10 py-5 bg-[#3B82F6] text-black text-lg md:text-xl font-black rounded-xl hover:bg-[#2563EB] transition-colors uppercase tracking-wider w-full md:w-auto shadow-[0_0_30px_rgba(59,130,246,0.3)] hover:scale-105 duration-300 cursor-pointer"
             >
-              APPLY FOR FOUNDING 30
+              BOOK YOUR SLOT (5 SEATS ONLY)
             </button>
             <p className="text-red-400 mt-4 text-sm font-bold uppercase tracking-widest flex items-center justify-center gap-2">
               <span className="w-2 h-2 rounded-full bg-red-500 animate-ping"></span>

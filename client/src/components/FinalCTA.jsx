@@ -27,10 +27,22 @@ export default function FinalCTA() {
         </div>
 
         <button 
-          onClick={() => window.location.href = '#register'}
-          className="px-12 py-6 bg-black text-[#3B82F6] text-xl md:text-2xl font-black rounded-2xl hover:bg-neutral-900 transition-colors uppercase tracking-widest shadow-[0_20px_50px_rgba(0,0,0,0.3)] hover:scale-105 duration-300"
+          onClick={(e) => {
+            e?.preventDefault?.();
+            const el = document.getElementById('register');
+            if (el) {
+              el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              setTimeout(() => {
+                const input = el.querySelector('input');
+                if (input) input.focus({ preventScroll: true });
+              }, 500);
+            } else {
+              window.location.href = '#register';
+            }
+          }}
+          className="px-12 py-6 bg-black text-[#3B82F6] text-xl md:text-2xl font-black rounded-2xl hover:bg-neutral-900 transition-colors uppercase tracking-widest shadow-[0_20px_50px_rgba(0,0,0,0.3)] hover:scale-105 duration-300 cursor-pointer"
         >
-          APPLY FOR BanaviAeBrand
+          BOOK YOUR SLOT — 5 SEATS AVAILABLE
         </button>
         
         <p className="mt-6 text-black/70 font-bold uppercase tracking-widest text-sm">

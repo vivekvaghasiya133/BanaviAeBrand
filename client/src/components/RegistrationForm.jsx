@@ -37,6 +37,14 @@ export default function RegistrationForm() {
         console.error(err);
         setLoadingWorkshops(false);
       });
+
+    const handleSelectWs = (e) => {
+      if (e.detail?.workshopId) {
+        setFormData(prev => ({ ...prev, workshopId: e.detail.workshopId }));
+      }
+    };
+    window.addEventListener('selectWorkshop', handleSelectWs);
+    return () => window.removeEventListener('selectWorkshop', handleSelectWs);
   }, []);
 
   const handleChange = (e) => {
@@ -102,9 +110,12 @@ export default function RegistrationForm() {
       
       <div className="mb-8 text-center">
         <h2 className="text-3xl font-black text-white mb-2 uppercase tracking-tight">APPLY FOR BANAVIAEBRAND</h2>
-        <p className="text-red-400 text-sm font-bold flex items-center justify-center gap-2 mt-1">
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-red-500/10 border border-red-500/30 rounded-full text-red-400 text-xs font-black uppercase tracking-wider mt-1 shadow-[0_0_15px_rgba(239,68,68,0.2)]">
           <span className="w-2 h-2 rounded-full bg-red-500 animate-ping"></span>
-          માત્ર 5 સીટો ઉપલબ્ધ છે (Hurry! Only 5 seats available). વહેલા તે પહેલાના ધોરણે રજીસ્ટ્રેશન.
+          <span>માત્ર 5 સીટો ઉપલબ્ધ છે · ONLY 5 SEATS AVAILABLE</span>
+        </div>
+        <p className="text-white/50 text-xs mt-2 uppercase tracking-wider font-semibold">
+          વહેલા તે પહેલાના ધોરણે રજીસ્ટ્રેશન (First Come, First Served)
         </p>
       </div>
 
@@ -130,14 +141,14 @@ export default function RegistrationForm() {
               required
               value={formData.workshopId}
               onChange={handleChange}
-              className="w-full px-4 py-3 bg-[#101018] border border-white/10 rounded-lg text-white focus:ring-2 focus:ring-[#3B82F6] focus:border-[#3B82F6] outline-none transition-all appearance-none"
+              className="w-full px-4 py-3 bg-[#101018] border border-white/10 rounded-lg text-white focus:ring-2 focus:ring-[#3B82F6] focus:border-[#3B82F6] outline-none transition-all appearance-none cursor-pointer"
             >
               <option value="" disabled>
                 {loadingWorkshops ? 'Loading dates...' : 'Select date & location'}
               </option>
               {!loadingWorkshops && workshops.map(ws => (
                 <option key={ws.id} value={ws.id} disabled={ws.isFull}>
-                  {ws.date} - {ws.location} {ws.isFull ? '(SOLD OUT)' : `(${ws.slotsLeft} left)`}
+                  {ws.date} - {ws.location} {ws.isFull ? '(SOLD OUT)' : '(Only 5 Seats Available)'}
                 </option>
               ))}
             </select>

@@ -7,9 +7,9 @@ import {
 import { API_URL } from '../config';
 
 // Helper to determine follow-up status (Today, Overdue, Upcoming) accurately
-export const getFollowUpStatus = (dateStr, historyList = []) => {
+export const getFollowUpStatus = (dateStr, historyList = [], fallbackCreatedAt = null) => {
   if (!dateStr || !dateStr.trim()) {
-    return { status: 'None', label: 'Not Scheduled', isToday: false, isOverdue: false, isUpcoming: false };
+    return { status: 'None', label: 'Not Scheduled', isToday: false, isOverdue: false, isUpcoming: false, date: null };
   }
 
   const now = new Date();
@@ -19,51 +19,76 @@ export const getFollowUpStatus = (dateStr, historyList = []) => {
   const todayStart = new Date(todayYear, todayMonth, todayDate, 0, 0, 0, 0);
   const todayEnd = new Date(todayYear, todayMonth, todayDate, 23, 59, 59, 999);
 
-  let targetDate = null;
   const raw = dateStr.trim();
   const lower = raw.toLowerCase();
 
   // Find creation date of the latest history item if available
   const lastEntry = historyList && historyList.length > 0 ? historyList[historyList.length - 1] : null;
-  const createdDate = lastEntry?.createdAt ? new Date(lastEntry.createdAt) : now;
+  const createdRaw = lastEntry?.createdAt || fallbackCreatedAt;
+  const createdDate = createdRaw ? new Date(createdRaw) : now;
 
-  // 1. Check relative keywords: "today", "tomorrow", "in X days"
+  let targetDate = null;
+
+  // 1. Relative keyword matching (handles "tomorrow", "next day", "kale", "kal", "today", "aaje")
   if (lower.startsWith('today') || lower.includes('aaje')) {
     targetDate = new Date(createdDate.getFullYear(), createdDate.getMonth(), createdDate.getDate());
-  } else if (lower.startsWith('tomorrow') || lower.includes('kale')) {
+  } else if (
+    lower.startsWith('tomorrow') || 
+    lower.includes('next day') || 
+    lower.includes('nextday') ||
+    lower.includes('kale') || 
+    /\bkal\b/.test(lower)
+  ) {
     targetDate = new Date(createdDate.getFullYear(), createdDate.getMonth(), createdDate.getDate() + 1);
   } else if (lower.includes('in 2 days')) {
     targetDate = new Date(createdDate.getFullYear(), createdDate.getMonth(), createdDate.getDate() + 2);
   } else if (lower.includes('in 3 days')) {
     targetDate = new Date(createdDate.getFullYear(), createdDate.getMonth(), createdDate.getDate() + 3);
   } else {
-    // 2. Try parsing DD/MM/YYYY or DD-MM-YYYY
-    const ddmmyyyy = raw.match(/^(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{4})/);
+    // 2. Try parsing DD/MM/YYYY or DD-MM-YYYY or DD.MM.YYYY (e.g. 26/09/2026 or 26-09-2026, 11:00 AM)
+    const ddmmyyyy = raw.match(/(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{4})/);
     if (ddmmyyyy) {
       const day = parseInt(ddmmyyyy[1], 10);
       const month = parseInt(ddmmyyyy[2], 10) - 1;
       const year = parseInt(ddmmyyyy[3], 10);
       targetDate = new Date(year, month, day);
     } else {
-      // 3. Try parsing YYYY-MM-DD
-      const yyyymmdd = raw.match(/^(\d{4})[\/\-\.](\d{1,2})[\/\-\.](\d{1,2})/);
-      if (yyyymmdd) {
-        const year = parseInt(yyyymmdd[1], 10);
-        const month = parseInt(yyyymmdd[2], 10) - 1;
-        const day = parseInt(yyyymmdd[3], 10);
+      // 3. Try parsing DD/MM/YY (2-digit year)
+      const ddmmyy = raw.match(/(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{2})\b/);
+      if (ddmmyy) {
+        const day = parseInt(ddmmyy[1], 10);
+        const month = parseInt(ddmmyy[2], 10) - 1;
+        const year = 2000 + parseInt(ddmmyy[3], 10);
         targetDate = new Date(year, month, day);
       } else {
-        // 4. Fallback Date.parse
-        const parsed = new Date(raw);
-        if (!isNaN(parsed.getTime())) {
-          targetDate = new Date(parsed.getFullYear(), parsed.getMonth(), parsed.getDate());
+        // 4. Try parsing YYYY-MM-DD (e.g. from <input type="date"> or ISO string)
+        const yyyymmdd = raw.match(/(\d{4})[\/\-\.](\d{1,2})[\/\-\.](\d{1,2})/);
+        if (yyyymmdd) {
+          const year = parseInt(yyyymmdd[1], 10);
+          const month = parseInt(yyyymmdd[2], 10) - 1;
+          const day = parseInt(yyyymmdd[3], 10);
+          targetDate = new Date(year, month, day);
+        } else {
+          // 5. Try parsing DD/MM or DD-MM (without year, assume current year)
+          const ddmm = raw.match(/^(\d{1,2})[\/\-\.](\d{1,2})\b/);
+          if (ddmm) {
+            const day = parseInt(ddmm[1], 10);
+            const month = parseInt(ddmm[2], 10) - 1;
+            targetDate = new Date(todayYear, month, day);
+          } else {
+            // 6. Fallback Date.parse (handles "26 Sep", "Sep 26 2026", etc.)
+            const parsed = new Date(raw);
+            if (!isNaN(parsed.getTime())) {
+              targetDate = new Date(parsed.getFullYear(), parsed.getMonth(), parsed.getDate());
+            }
+          }
         }
       }
     }
   }
 
   if (!targetDate || isNaN(targetDate.getTime())) {
-    return { status: 'Other', label: raw, isToday: false, isOverdue: false, isUpcoming: false };
+    return { status: 'Other', label: raw, isToday: false, isOverdue: false, isUpcoming: false, date: null };
   }
 
   const targetTime = targetDate.getTime();
@@ -71,11 +96,11 @@ export const getFollowUpStatus = (dateStr, historyList = []) => {
   const endTime = todayEnd.getTime();
 
   if (targetTime < startTime) {
-    return { status: 'Overdue', label: raw, isToday: false, isOverdue: true, isUpcoming: false };
+    return { status: 'Overdue', label: raw, isToday: false, isOverdue: true, isUpcoming: false, date: targetDate };
   } else if (targetTime >= startTime && targetTime <= endTime) {
-    return { status: 'Today', label: raw, isToday: true, isOverdue: false, isUpcoming: false };
+    return { status: 'Today', label: raw, isToday: true, isOverdue: false, isUpcoming: false, date: targetDate };
   } else {
-    return { status: 'Upcoming', label: raw, isToday: false, isOverdue: false, isUpcoming: true };
+    return { status: 'Upcoming', label: raw, isToday: false, isOverdue: false, isUpcoming: true, date: targetDate };
   }
 };
 
@@ -173,6 +198,23 @@ export default function FollowupDashboard({ registrations = [], fetchRegistratio
     targetFormSetter(prev => ({ ...prev, nextFollowUpDate: formatted }));
   };
 
+  const handleDateTimeChange = (isoDateTime, targetFormSetter) => {
+    if (!isoDateTime) return;
+    const d = new Date(isoDateTime);
+    if (isNaN(d.getTime())) return;
+    const dd = String(d.getDate()).padStart(2, '0');
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const yyyy = d.getFullYear();
+    let hours = d.getHours();
+    const minutes = String(d.getMinutes()).padStart(2, '0');
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    hours = hours % 12;
+    hours = hours ? hours : 12;
+    const formattedHours = String(hours).padStart(2, '0');
+    const formatted = `${dd}/${mm}/${yyyy}, ${formattedHours}:${minutes} ${ampm}`;
+    targetFormSetter(prev => ({ ...prev, nextFollowUpDate: formatted }));
+  };
+
   const handleCreateManualLead = async (e) => {
     e.preventDefault();
     if (!leadForm.name || !leadForm.phone) {
@@ -219,7 +261,7 @@ export default function FollowupDashboard({ registrations = [], fetchRegistratio
 
   // Enrich registrations with computed follow-up status
   const enrichedRegistrations = registrations.map(reg => {
-    const followUpInfo = getFollowUpStatus(reg.latestNextFollowUpDate, reg.followUpHistory);
+    const followUpInfo = getFollowUpStatus(reg.latestNextFollowUpDate, reg.followUpHistory, reg.createdAt);
     return {
       ...reg,
       followUpInfo
@@ -722,15 +764,35 @@ export default function FollowupDashboard({ registrations = [], fetchRegistratio
                   >
                     In 2 Days
                   </button>
+                  <button 
+                    type="button"
+                    onClick={() => setFormattedQuickDate(3, '11:00 AM', setLeadForm)}
+                    className="px-3 py-1 bg-white border border-emerald-200 text-emerald-800 text-xs font-bold rounded-lg hover:bg-emerald-50 cursor-pointer shadow-2xs"
+                  >
+                    In 3 Days
+                  </button>
                 </div>
 
-                <input 
-                  type="text"
-                  placeholder="DD/MM/YYYY, HH:MM PM"
-                  value={leadForm.nextFollowUpDate}
-                  onChange={e => setLeadForm({ ...leadForm, nextFollowUpDate: e.target.value })}
-                  className="w-full px-4 py-2.5 bg-white border border-emerald-200 rounded-xl text-sm font-bold text-emerald-900 outline-none focus:ring-2 focus:ring-emerald-500 shadow-sm"
-                />
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                  <div className="relative flex-1">
+                    <input 
+                      type="text"
+                      placeholder="DD/MM/YYYY, HH:MM PM (or 'Tomorrow 11am')"
+                      value={leadForm.nextFollowUpDate}
+                      onChange={e => setLeadForm({ ...leadForm, nextFollowUpDate: e.target.value })}
+                      className="w-full px-4 py-2.5 bg-white border border-emerald-200 rounded-xl text-sm font-bold text-emerald-900 outline-none focus:ring-2 focus:ring-emerald-500 shadow-sm"
+                    />
+                  </div>
+                  <div className="flex items-center gap-1.5 px-3 py-2 bg-white border border-emerald-200 rounded-xl text-xs font-semibold text-emerald-800 shadow-sm">
+                    <Calendar size={14} className="text-emerald-600 shrink-0" />
+                    <input 
+                      type="datetime-local" 
+                      onChange={e => handleDateTimeChange(e.target.value, setLeadForm)}
+                      className="text-xs bg-transparent text-gray-700 outline-none cursor-pointer"
+                      title="Select date & time"
+                    />
+                  </div>
+                </div>
               </div>
 
               {/* Note */}
@@ -870,17 +932,34 @@ export default function FollowupDashboard({ registrations = [], fetchRegistratio
                   >
                     In 2 Days
                   </button>
+                  <button 
+                    type="button"
+                    onClick={() => setFormattedQuickDate(3, '11:00 AM', setForm)}
+                    className="px-3 py-1.5 bg-white border border-emerald-200 text-emerald-800 text-xs font-bold rounded-lg hover:bg-emerald-50 transition-colors shadow-2xs cursor-pointer"
+                  >
+                    In 3 Days
+                  </button>
                 </div>
                 
-                <div className="relative">
-                  <input 
-                    type="text"
-                    value={form.nextFollowUpDate}
-                    onChange={e => setForm({...form, nextFollowUpDate: e.target.value})}
-                    placeholder="DD/MM/YYYY, HH:MM PM"
-                    className="w-full px-4 py-2.5 bg-white border border-emerald-200 rounded-xl text-emerald-900 font-bold focus:ring-2 focus:ring-emerald-500 outline-none shadow-sm text-sm"
-                  />
-                  <Calendar className="absolute right-4 top-3 text-emerald-400" size={16}/>
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                  <div className="relative flex-1">
+                    <input 
+                      type="text"
+                      value={form.nextFollowUpDate}
+                      onChange={e => setForm({...form, nextFollowUpDate: e.target.value})}
+                      placeholder="DD/MM/YYYY, HH:MM PM (or 'Tomorrow 11am')"
+                      className="w-full px-4 py-2.5 bg-white border border-emerald-200 rounded-xl text-emerald-900 font-bold focus:ring-2 focus:ring-emerald-500 outline-none shadow-sm text-sm"
+                    />
+                  </div>
+                  <div className="flex items-center gap-1.5 px-3 py-2 bg-white border border-emerald-200 rounded-xl text-xs font-semibold text-emerald-800 shadow-sm">
+                    <Calendar size={14} className="text-emerald-600 shrink-0" />
+                    <input 
+                      type="datetime-local" 
+                      onChange={e => handleDateTimeChange(e.target.value, setForm)}
+                      className="text-xs bg-transparent text-gray-700 outline-none cursor-pointer"
+                      title="Select date & time"
+                    />
+                  </div>
                 </div>
               </div>
 

@@ -392,11 +392,23 @@ export default function HeroSolarSystem({ onOpenOnboarding }) {
 
             <div className="flex items-center justify-start gap-5">
               <button
-                onClick={() => window.location.href = '#register'}
-                data-cursor-label="Apply"
-                className="group flex items-center gap-3 px-8 py-4 bg-[#3B82F6] text-white font-black rounded-full hover:bg-white hover:text-black transition-all duration-300 hover:scale-105 shadow-[0_0_40px_rgba(59,130,246,0.3)] text-sm uppercase tracking-wider"
+                onClick={(e) => {
+                  e?.preventDefault?.();
+                  const el = document.getElementById('register');
+                  if (el) {
+                    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    setTimeout(() => {
+                      const input = el.querySelector('input');
+                      if (input) input.focus({ preventScroll: true });
+                    }, 500);
+                  } else {
+                    window.location.href = '#register';
+                  }
+                }}
+                data-cursor-label="Book Slot"
+                className="group flex items-center gap-3 px-8 py-4 bg-[#3B82F6] text-white font-black rounded-full hover:bg-white hover:text-black transition-all duration-300 hover:scale-105 shadow-[0_0_40px_rgba(59,130,246,0.3)] text-sm uppercase tracking-wider cursor-pointer"
               >
-                <span>Apply For Founding 30</span>
+                <span>Book Slot (5 Seats Left)</span>
                 <svg
                   width="14"
                   height="14"

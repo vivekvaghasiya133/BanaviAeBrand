@@ -47,12 +47,24 @@ export default function Footer({ onOpenOnboarding }) {
           </div>
 
           <button
-            onClick={() => {
+            onClick={(e) => {
+              e?.preventDefault?.();
+              if (window.location.pathname !== '/') {
+                window.location.href = '/#register';
+                return;
+              }
               const el = document.getElementById('register');
-              if (el) el.scrollIntoView({ behavior: 'smooth' });
-              else window.location.href = '#register';
+              if (el) {
+                el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                setTimeout(() => {
+                  const input = el.querySelector('input');
+                  if (input) input.focus({ preventScroll: true });
+                }, 500);
+              } else {
+                window.location.hash = 'register';
+              }
             }}
-            className="px-8 py-4 rounded-xl bg-[#3B82F6] text-black font-black text-sm uppercase tracking-wider hover:bg-[#2563EB] shadow-[0_0_25px_rgba(59,130,246,0.4)] transition-all flex items-center gap-2 whitespace-nowrap"
+            className="px-8 py-4 rounded-xl bg-[#3B82F6] text-black font-black text-sm uppercase tracking-wider hover:bg-[#2563EB] shadow-[0_0_25px_rgba(59,130,246,0.4)] transition-all flex items-center gap-2 whitespace-nowrap cursor-pointer hover:scale-105 duration-200"
           >
             <span>Book Your Slot</span>
             <ArrowUpRight size={18} />
@@ -60,7 +72,7 @@ export default function Footer({ onOpenOnboarding }) {
         </div>
 
         {/* Middle Section: 4-Column Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 mb-16">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 mb-16">
           {/* Col 1 & 2: Brand Info */}
           <div className="lg:col-span-2 space-y-5">
             <a href="/" className="inline-block">
@@ -157,14 +169,108 @@ export default function Footer({ onOpenOnboarding }) {
             </div>
           </div>
 
+          {/* Col 3: Navigation */}
+          <div>
+            <h4 className="text-xs font-mono font-bold uppercase tracking-widest text-[#3B82F6] mb-4">
+              Quick Links
+            </h4>
+            <ul className="space-y-2.5 text-sm text-white/70">
+              <li>
+                <a 
+                  href="#services" 
+                  onClick={(e) => {
+                    e.preventDefault();
+                    document.getElementById('services')?.scrollIntoView({ behavior: 'smooth' });
+                  }}
+                  className="hover:text-white transition-colors"
+                >
+                  Services
+                </a>
+              </li>
+              <li>
+                <a 
+                  href="#workshops" 
+                  onClick={(e) => {
+                    e.preventDefault();
+                    document.getElementById('workshops')?.scrollIntoView({ behavior: 'smooth' });
+                  }}
+                  className="hover:text-white transition-colors"
+                >
+                  Workshops
+                </a>
+              </li>
+              <li>
+                <a 
+                  href="#team" 
+                  onClick={(e) => {
+                    e.preventDefault();
+                    document.getElementById('team')?.scrollIntoView({ behavior: 'smooth' });
+                  }}
+                  className="hover:text-white transition-colors"
+                >
+                  Team
+                </a>
+              </li>
+              <li>
+                <a 
+                  href="#register" 
+                  onClick={(e) => {
+                    e.preventDefault();
+                    const el = document.getElementById('register');
+                    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  }}
+                  className="hover:text-white transition-colors"
+                >
+                  Apply Now
+                </a>
+              </li>
+            </ul>
+          </div>
+
+          {/* Col 4: Batch Availability */}
+          <div>
+            <h4 className="text-xs font-mono font-bold uppercase tracking-widest text-[#3B82F6] mb-4">
+              Availability
+            </h4>
+            <div className="space-y-3 text-xs text-white/70">
+              <div className="p-3.5 rounded-xl bg-white/[0.04] border border-white/5 space-y-2">
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-red-500/10 border border-red-500/30 text-red-400 text-[10px] font-black uppercase tracking-wider">
+                  <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-ping" />
+                  Only 5 Seats Available
+                </div>
+                <p className="text-white/60 leading-relaxed text-[11px]">
+                  Batch size is strictly limited to 5 seats on a first-come, first-served basis.
+                </p>
+              </div>
+
+              <button
+                onClick={(e) => {
+                  e?.preventDefault?.();
+                  const el = document.getElementById('register');
+                  if (el) {
+                    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    setTimeout(() => {
+                      const input = el.querySelector('input');
+                      if (input) input.focus({ preventScroll: true });
+                    }, 500);
+                  }
+                }}
+                className="w-full py-2.5 rounded-lg bg-[#3B82F6]/10 border border-[#3B82F6]/30 text-[#3B82F6] hover:bg-[#3B82F6] hover:text-black font-bold transition-all uppercase tracking-wider text-xs flex items-center justify-center gap-1.5 cursor-pointer"
+              >
+                <span>Book Your Slot</span>
+                <ArrowUpRight size={14} />
+              </button>
+            </div>
+          </div>
         </div>
 
         {/* Bottom Copyright Bar */}
         <div className="pt-8 border-t border-white/[0.08] flex flex-col sm:flex-row items-center justify-between text-xs text-white/40 gap-4">
           <div>
-            @2026 Up BanaviaeBrand All rights resevred.
+            © 2026 BanaviAeBrand. All rights reserved.
           </div>
           <div className="flex items-center gap-6">
+            <span>Real Action · Real Results · Surat, Gujarat</span>
           </div>
         </div>
       </div>

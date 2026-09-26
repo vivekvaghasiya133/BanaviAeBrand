@@ -10,9 +10,9 @@ export default function DeliveredMetrics() {
       icon: <Clock className="w-5 h-5 text-lime" />,
     },
     {
-      value: "30",
+      value: "5",
       unit: "SEATS",
-      label: "Limited Batch",
+      label: "Founding Batch (Limited)",
       icon: <Users className="w-5 h-5 text-[#00D4E8]" />,
     },
     {

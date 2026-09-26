@@ -21,9 +21,18 @@ export default function UpcomingWorkshops() {
       });
   }, []);
 
-  const handleRegisterClick = () => {
+  const handleRegisterClick = (workshop) => {
     const el = document.getElementById('register');
-    if (el) el.scrollIntoView({ behavior: 'smooth' });
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      if (workshop?.id) {
+        window.dispatchEvent(new CustomEvent('selectWorkshop', { detail: { workshopId: workshop.id } }));
+      }
+      setTimeout(() => {
+        const input = el.querySelector('input');
+        if (input) input.focus({ preventScroll: true });
+      }, 500);
+    }
   };
 
   return (
@@ -33,8 +42,10 @@ export default function UpcomingWorkshops() {
       
       <div className="max-w-7xl mx-auto px-6 relative z-10">
         <div className="text-center mb-16">
-          <div className="inline-block px-3 py-1 bg-[#3B82F6]/10 border border-[#3B82F6]/20 text-[#3B82F6] text-xs font-bold uppercase tracking-widest rounded-full mb-4">
-            Limited Batch Sizes
+          <div className="inline-flex items-center gap-2 px-3.5 py-1 bg-[#3B82F6]/10 border border-[#3B82F6]/20 text-[#3B82F6] text-xs font-bold uppercase tracking-widest rounded-full mb-4">
+            <span>FOUNDING BATCH</span>
+            <span className="text-white/30">·</span>
+            <span className="text-red-400 font-black animate-pulse">🔥 ONLY 5 SEATS AVAILABLE</span>
           </div>
           <h2 className="text-4xl md:text-5xl font-black uppercase tracking-tight">
             Upcoming <span className="text-[#3B82F6]">Workshops</span>
@@ -72,9 +83,12 @@ export default function UpcomingWorkshops() {
                     {/* Header Info */}
                     <div>
                       <h3 className="text-2xl font-black text-white mb-3">{ws.date}</h3>
-                      <div className="flex flex-wrap gap-4 text-sm text-white/60 font-medium">
+                      <div className="flex flex-wrap items-center gap-3 text-sm text-white/60 font-medium">
                         <span className="flex items-center gap-1.5"><MapPin size={16} className="text-[#3B82F6]" /> {ws.location}</span>
-                        <span className="flex items-center gap-1.5"><Users size={16} className="text-[#3B82F6]" /> {ws.slotsLeft} Seats Left</span>
+                        <span className="flex items-center gap-1.5 font-bold text-red-400 bg-red-500/10 px-2.5 py-1 rounded-full border border-red-500/20 text-xs">
+                          <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-ping" />
+                          Only 5 Seats Available
+                        </span>
                       </div>
                     </div>
 
@@ -111,12 +125,12 @@ export default function UpcomingWorkshops() {
 
                     {/* Action Button */}
                     <button 
-                      onClick={handleRegisterClick}
+                      onClick={() => handleRegisterClick(ws)}
                       disabled={ws.isFull}
-                      className={`w-full py-4 mt-2 rounded-xl font-black uppercase tracking-widest text-sm flex items-center justify-center gap-2 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed
+                      className={`w-full py-4 mt-2 rounded-xl font-black uppercase tracking-widest text-sm flex items-center justify-center gap-2 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer
                         ${ws.isFull ? 'bg-white/5 text-white/40 border border-white/10' : 'bg-[#3B82F6] text-black hover:bg-[#2563EB] hover:shadow-[0_0_20px_rgba(59,130,246,0.4)]'}`}
                     >
-                      {ws.isFull ? 'Waitlist Only' : 'Select Tier & Register'}
+                      {ws.isFull ? 'Waitlist Only' : 'Book Your Slot'}
                       {!ws.isFull && <ArrowRight size={16} />}
                     </button>
                   </div>
