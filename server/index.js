@@ -16,7 +16,8 @@ const app = express();
 const PORT = process.env.PORT || 5001;
 
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
 // MongoDB Connection
 // The user should set this in their .env file. Fallback is provided to prevent crashes if not set.
@@ -49,6 +50,12 @@ const registrationSchema = new mongoose.Schema({
   source: { type: String, default: 'Direct' },
   workshopId: { type: String, default: '' },
   workshopDate: { type: String, default: '' },
+  // Lead Categories: 'original' | 'coldcall' | 'confirmed'
+  leadType: { type: String, enum: ['original', 'coldcall', 'confirmed'], default: 'original', index: true },
+  tag: { type: String, default: '', index: true },
+  confirmedAt: { type: Date },
+  confirmedCourse: { type: String, default: '' },
+  confirmedNote: { type: String, default: '' },
   // CRM Follow-up Management Fields
   followUpHistory: [{
     outcome: String,
@@ -236,16 +243,276 @@ app.post('/api/register', async (req, res) => {
 // Admin Routes for Registrations
 app.get('/api/admin/registrations', async (req, res) => {
   try {
-    const regs = await Registration.find().sort({ createdAt: -1 }).lean();
+    const { leadType, tag, search } = req.query;
+    let query = {};
+
+    if (leadType === 'original') {
+      query.$or = [{ leadType: 'original' }, { leadType: { $exists: false } }, { leadType: null }];
+    } else if (leadType === 'coldcall') {
+      query.leadType = 'coldcall';
+    } else if (leadType === 'confirmed') {
+      query.leadType = 'confirmed';
+    }
+
+    if (tag && tag !== 'All') {
+      query.tag = tag;
+    }
+
+    if (search) {
+      const searchRegex = new RegExp(search.trim(), 'i');
+      query.$and = query.$and || [];
+      query.$and.push({
+        $or: [
+          { name: searchRegex },
+          { phone: searchRegex },
+          { email: searchRegex },
+          { tag: searchRegex },
+          { city: searchRegex }
+        ]
+      });
+    }
+
+    const regs = await Registration.find(query).sort({ createdAt: -1 }).lean();
     
     const formattedRegs = regs.map(r => ({
       ...r,
-      id: r._id.toString()
+      id: r._id.toString(),
+      leadType: r.leadType || 'original',
+      tag: r.tag || ''
     }));
     
     res.json({ success: true, data: formattedRegs });
   } catch (error) {
     console.error('Error fetching registrations:', error);
+    res.status(500).json({ success: false, error: 'Server error' });
+  }
+});
+
+// Admin: Get Lead Counts and Distinct Tags
+app.get('/api/admin/lead-counts', async (req, res) => {
+  try {
+    const [original, coldcall, confirmed, total] = await Promise.all([
+      Registration.countDocuments({
+        $or: [{ leadType: 'original' }, { leadType: { $exists: false } }, { leadType: null }]
+      }),
+      Registration.countDocuments({ leadType: 'coldcall' }),
+      Registration.countDocuments({ leadType: 'confirmed' }),
+      Registration.countDocuments({})
+    ]);
+
+    const distinctTags = await Registration.distinct('tag', { leadType: 'coldcall', tag: { $ne: '' } });
+
+    res.json({
+      success: true,
+      counts: { original, coldcall, confirmed, total },
+      tags: distinctTags.filter(Boolean)
+    });
+  } catch (error) {
+    console.error('Error fetching lead counts:', error);
+    res.status(500).json({ success: false, error: 'Server error' });
+  }
+});
+
+// Admin: Bulk Import Leads (6000+ support with batching)
+app.post('/api/admin/registrations/bulk-import', async (req, res) => {
+  try {
+    const { leads, leadType = 'coldcall', defaultTag = '', callerName = 'Admin' } = req.body;
+    
+    if (!Array.isArray(leads) || leads.length === 0) {
+      return res.status(400).json({ success: false, error: 'Leads array is required and must not be empty.' });
+    }
+
+    console.log(`📥 Starting bulk import of ${leads.length} leads (type: ${leadType})...`);
+
+    const documents = [];
+    const now = new Date();
+
+    for (let i = 0; i < leads.length; i++) {
+      const item = leads[i];
+      if (!item) continue;
+
+      const rawPhone = String(item.phone || item.number || item.mobile || '').trim();
+      const cleanPhone = rawPhone.replace(/[\s\-\(\)\.]/g, '');
+      
+      if (!cleanPhone) continue; // skip entries without phone number
+
+      const name = String(item.name || 'Prospect').trim();
+      const tag = String(item.tag || item.category || defaultTag || '').trim();
+      const city = String(item.city || '').trim();
+      const email = String(item.email || '').trim();
+
+      documents.push({
+        name,
+        phone: cleanPhone,
+        email,
+        city,
+        tag,
+        leadType: leadType || 'coldcall',
+        source: item.source || 'Cold Call Import',
+        profession: item.profession || tag || 'General',
+        interestArea: tag || 'General',
+        latestOutcome: item.outcome || 'Pending',
+        latestCallerName: callerName || '',
+        followUpHistory: [],
+        createdAt: now
+      });
+    }
+
+    if (documents.length === 0) {
+      return res.status(400).json({ success: false, error: 'No valid leads with phone numbers found in import data.' });
+    }
+
+    // Insert in batches of 1000 for high efficiency and safety
+    const BATCH_SIZE = 1000;
+    let insertedCount = 0;
+
+    for (let i = 0; i < documents.length; i += BATCH_SIZE) {
+      const batch = documents.slice(i, i + BATCH_SIZE);
+      const result = await Registration.insertMany(batch, { ordered: false });
+      insertedCount += result.length;
+    }
+
+    console.log(`✅ Bulk import completed: ${insertedCount} leads inserted successfully!`);
+
+    res.json({
+      success: true,
+      count: insertedCount,
+      totalReceived: leads.length,
+      message: `Successfully imported ${insertedCount} leads.`
+    });
+  } catch (error) {
+    console.error('Error in bulk import:', error);
+    if (error.insertedDocs || error.result?.nInserted) {
+      const count = error.insertedDocs?.length || error.result?.nInserted || 0;
+      return res.json({
+        success: true,
+        count,
+        warning: 'Bulk import partially completed with some skipped duplicates or invalid entries.'
+      });
+    }
+    res.status(500).json({ success: false, error: error.message || 'Server error during bulk import' });
+  }
+});
+
+// Admin: Move Lead to another category (e.g. Cold Call -> Original Leads)
+app.patch('/api/admin/registrations/:id/move', async (req, res) => {
+  try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ success: false, error: 'Invalid ID format' });
+    }
+
+    const { targetType, callerName, note } = req.body;
+    if (!targetType || !['original', 'coldcall', 'confirmed'].includes(targetType)) {
+      return res.status(400).json({ success: false, error: 'Invalid target type' });
+    }
+
+    const lead = await Registration.findById(req.params.id);
+    if (!lead) {
+      return res.status(404).json({ success: false, error: 'Lead not found' });
+    }
+
+    const oldType = lead.leadType || 'original';
+    lead.leadType = targetType;
+
+    const moveNote = note || `Moved from ${oldType.toUpperCase()} to ${targetType.toUpperCase()}`;
+    lead.followUpHistory.push({
+      outcome: `Moved to ${targetType.charAt(0).toUpperCase() + targetType.slice(1)}`,
+      callerName: callerName || 'Admin',
+      nextFollowUpDate: lead.latestNextFollowUpDate || '',
+      note: moveNote,
+      createdAt: new Date()
+    });
+
+    if (callerName) lead.latestCallerName = callerName;
+
+    await lead.save();
+
+    res.json({
+      success: true,
+      data: { ...lead.toObject(), id: lead._id.toString() },
+      message: `Lead successfully moved to ${targetType}`
+    });
+  } catch (error) {
+    console.error('Error moving lead:', error);
+    res.status(500).json({ success: false, error: 'Server error moving lead' });
+  }
+});
+
+// Admin: Confirm Lead for Course / Workshop
+app.patch('/api/admin/registrations/:id/confirm', async (req, res) => {
+  try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ success: false, error: 'Invalid ID format' });
+    }
+
+    const { confirmedCourse, confirmedNote, callerName } = req.body;
+
+    const lead = await Registration.findById(req.params.id);
+    if (!lead) {
+      return res.status(404).json({ success: false, error: 'Lead not found' });
+    }
+
+    lead.leadType = 'confirmed';
+    lead.latestOutcome = 'Client Done';
+    lead.confirmedAt = new Date();
+    lead.confirmedCourse = confirmedCourse || lead.workshopDate || 'Workshop';
+    lead.confirmedNote = confirmedNote || '';
+    if (callerName) lead.latestCallerName = callerName;
+
+    const noteText = `Confirmed for ${lead.confirmedCourse}${confirmedNote ? ' | ' + confirmedNote : ''}`;
+    lead.followUpHistory.push({
+      outcome: 'Client Done',
+      callerName: callerName || 'Admin',
+      nextFollowUpDate: '',
+      note: noteText,
+      createdAt: new Date()
+    });
+
+    await lead.save();
+
+    res.json({
+      success: true,
+      data: { ...lead.toObject(), id: lead._id.toString() },
+      message: 'Lead confirmed for course successfully!'
+    });
+  } catch (error) {
+    console.error('Error confirming lead:', error);
+    res.status(500).json({ success: false, error: 'Server error confirming lead' });
+  }
+});
+
+// Admin: Revert Confirmation back to original or coldcall
+app.patch('/api/admin/registrations/:id/revert-confirm', async (req, res) => {
+  try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ success: false, error: 'Invalid ID format' });
+    }
+
+    const { targetType = 'original', callerName, note } = req.body;
+
+    const lead = await Registration.findById(req.params.id);
+    if (!lead) {
+      return res.status(404).json({ success: false, error: 'Lead not found' });
+    }
+
+    lead.leadType = targetType;
+    lead.latestOutcome = 'Call Again';
+    lead.followUpHistory.push({
+      outcome: 'Reverted Confirmation',
+      callerName: callerName || 'Admin',
+      note: note || 'Confirmation cancelled / reverted',
+      createdAt: new Date()
+    });
+
+    await lead.save();
+
+    res.json({
+      success: true,
+      data: { ...lead.toObject(), id: lead._id.toString() },
+      message: 'Confirmation reverted successfully'
+    });
+  } catch (error) {
+    console.error('Error reverting confirmation:', error);
     res.status(500).json({ success: false, error: 'Server error' });
   }
 });
@@ -288,6 +555,8 @@ app.post('/api/admin/registrations', async (req, res) => {
       participationAgreement: true,
       source: (source || 'Manual Entry').trim(),
       workshopDate: (workshopDate || '').trim(),
+      leadType: req.body.leadType || 'original',
+      tag: (req.body.tag || '').trim(),
       followUpHistory,
       latestOutcome: outcome || 'Call Again',
       latestNextFollowUpDate: nextFollowUpDate || '',
