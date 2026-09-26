@@ -723,42 +723,6 @@ export default function FollowupDashboard({
           </div>
         </div>
 
-        {/* ── Tag Filter Pills (Only visible in Cold Call Leads view) ── */}
-        {activeCategory === 'coldcall' && availableTags.length > 0 && (
-          <div className="mb-4 pt-2 border-t border-gray-100">
-            <div className="flex items-center gap-2 mb-2 text-xs font-bold text-gray-500 uppercase tracking-wider">
-              <Tag size={13} className="text-purple-600" /> Filter by Tag / Industry:
-            </div>
-            <div className="flex flex-wrap items-center gap-1.5 overflow-x-auto pb-1">
-              <button
-                onClick={() => { setSelectedTagFilter('All'); setCurrentPage(1); }}
-                className={`px-3 py-1 rounded-full text-xs font-bold border transition-all cursor-pointer ${
-                  selectedTagFilter === 'All'
-                    ? 'bg-purple-600 text-white border-purple-600 shadow-sm'
-                    : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100'
-                }`}
-              >
-                All Tags ({categoryStats.total})
-              </button>
-
-              {availableTags.map(tag => (
-                <button
-                  key={tag}
-                  onClick={() => { setSelectedTagFilter(tag); setCurrentPage(1); }}
-                  className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border transition-all cursor-pointer ${
-                    selectedTagFilter === tag
-                      ? 'bg-purple-600 text-white border-purple-600 shadow-sm'
-                      : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'
-                  }`}
-                >
-                  <span>🏷️ {tag}</span>
-                  <span className="text-[10px] opacity-75">({tagCounts[tag] || 0})</span>
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-
         {/* ── Admin Filter Pills (Only visible in Admin Calls view) ── */}
         {activeCategory === 'admincall' && (
           <div className="mb-4 pt-2 border-t border-gray-100">
@@ -913,7 +877,7 @@ export default function FollowupDashboard({
                         <a href={`tel:${reg.phone}`} className="hover:underline">{reg.phone}</a>
                       </div>
                       <a 
-                        href={`https://wa.me/${reg.phone.replace(/\D/g, '')}`} 
+                        href={`https://wa.me/${reg.phone && reg.phone.replace(/\D/g, '').length === 10 ? '91' + reg.phone.replace(/\D/g, '') : (reg.phone ? reg.phone.replace(/\D/g, '') : '')}`} 
                         target="_blank" 
                         rel="noreferrer" 
                         className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-green-50 text-emerald-700 text-xs font-bold rounded-lg mt-2 hover:bg-green-100 transition-colors border border-green-200"

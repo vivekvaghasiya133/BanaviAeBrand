@@ -354,7 +354,12 @@ app.post('/api/admin/registrations/bulk-import', async (req, res) => {
       if (!item) continue;
 
       const rawPhone = String(item.phone || item.number || item.mobile || '').trim();
-      const cleanPhone = rawPhone.replace(/[\s\-\(\)\.]/g, '');
+      let cleanPhone = rawPhone.replace(/[\s\-\(\)\.\+]/g, '');
+      if (cleanPhone.length === 12 && cleanPhone.startsWith('91')) {
+        cleanPhone = cleanPhone.slice(2);
+      } else if (cleanPhone.length === 11 && cleanPhone.startsWith('0')) {
+        cleanPhone = cleanPhone.slice(1);
+      }
       
       if (!cleanPhone) continue; // skip entries without phone number
 
@@ -563,9 +568,16 @@ app.post('/api/admin/registrations', async (req, res) => {
       });
     }
 
+    let cleanPhone = String(phone).trim().replace(/[\s\-\(\)\.\+]/g, '');
+    if (cleanPhone.length === 12 && cleanPhone.startsWith('91')) {
+      cleanPhone = cleanPhone.slice(2);
+    } else if (cleanPhone.length === 11 && cleanPhone.startsWith('0')) {
+      cleanPhone = cleanPhone.slice(1);
+    }
+
     const newReg = new Registration({
       name: name.trim(),
-      phone: phone.trim(),
+      phone: cleanPhone,
       email: (email || '').trim(),
       city: (city || '').trim(),
       instagramHandle: (instagramHandle || '').trim(),

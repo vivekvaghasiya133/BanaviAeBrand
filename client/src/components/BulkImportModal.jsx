@@ -18,10 +18,19 @@ export default function BulkImportModal({ isOpen, onClose, onSuccess, defaultCal
 
   if (!isOpen) return null;
 
-  // Clean phone number helper
+  // Clean & normalize phone number helper (removes +91, 91 prefix or 0 to get clean 10-digit Indian number)
   const cleanPhoneNumber = (val) => {
     if (!val) return '';
-    return String(val).replace(/[\s\-\(\)\.\+]/g, '');
+    let str = String(val).trim().replace(/[\s\-\(\)\.\+]/g, '');
+    // If it's a 12-digit Indian number starting with 91, remove 91 -> 10-digit
+    if (str.length === 12 && str.startsWith('91')) {
+      str = str.slice(2);
+    }
+    // If it's an 11-digit number starting with 0, remove 0 -> 10-digit
+    else if (str.length === 11 && str.startsWith('0')) {
+      str = str.slice(1);
+    }
+    return str;
   };
 
   // Parse a single CSV line with quote awareness (handles commas inside quotes)
