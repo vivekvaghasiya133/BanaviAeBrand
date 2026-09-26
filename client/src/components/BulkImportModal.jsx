@@ -24,6 +24,31 @@ export default function BulkImportModal({ isOpen, onClose, onSuccess, defaultCal
     return String(val).replace(/[\s\-\(\)\.\+]/g, '');
   };
 
+  // Parse a single CSV line with quote awareness (handles commas inside quotes)
+  const parseCSVLine = (line, delimiter = ',') => {
+    const result = [];
+    let cur = '';
+    let inQuotes = false;
+    for (let i = 0; i < line.length; i++) {
+      const c = line[i];
+      if (c === '"') {
+        if (inQuotes && line[i + 1] === '"') {
+          cur += '"';
+          i++; // skip escaped quote
+        } else {
+          inQuotes = !inQuotes;
+        }
+      } else if (c === delimiter && !inQuotes) {
+        result.push(cur.trim().replace(/^"|"$/g, ''));
+        cur = '';
+      } else {
+        cur += c;
+      }
+    }
+    result.push(cur.trim().replace(/^"|"$/g, ''));
+    return result;
+  };
+
   // Robust Native Parser for CSV / TSV / Pasted rows
   const parseRows = (text) => {
     if (!text || !text.trim()) return [];
@@ -33,55 +58,72 @@ export default function BulkImportModal({ isOpen, onClose, onSuccess, defaultCal
 
     const results = [];
     
-    // Check if line 1 is a header
-    const firstLineLower = lines[0].toLowerCase();
-    const hasHeader = 
-      firstLineLower.includes('name') || 
-      firstLineLower.includes('phone') || 
-      firstLineLower.includes('number') || 
-      firstLineLower.includes('mobile') || 
-      firstLineLower.includes('tag');
-
-    const startIndex = hasHeader ? 1 : 0;
-
-    // Detect delimiter in first row (tab or comma or pipe)
+    // Detect delimiter in first row (tab, comma, semicolon, pipe)
     const sampleLine = lines[0];
     let delimiter = ',';
     if (sampleLine.includes('\t')) delimiter = '\t';
     else if (sampleLine.includes('|')) delimiter = '|';
     else if (sampleLine.includes(';') && !sampleLine.includes(',')) delimiter = ';';
 
+    // Parse the first line to check for headers
+    const firstLineParts = parseCSVLine(lines[0], delimiter);
+    const firstLineLower = firstLineParts.map(p => p.toLowerCase().trim());
+
+    let nameIdx = -1;
+    let phoneIdx = -1;
+    let tagIdx = -1;
+
+    // Check if line 1 has recognizable headers
+    const hasHeader = firstLineLower.some(h => 
+      h === 'name' || h.includes('name') || 
+      h === 'phone' || h.includes('phone') || h.includes('number') || h.includes('mobile') ||
+      h === 'tag' || h === 'tags' || h.includes('tag') || h.includes('category')
+    );
+
+    if (hasHeader) {
+      nameIdx = firstLineLower.findIndex(h => h === 'name' || h.includes('name') || h.includes('lead') || h.includes('student'));
+      phoneIdx = firstLineLower.findIndex(h => h === 'phone' || h.includes('phone') || h.includes('number') || h.includes('mobile') || h.includes('cell'));
+      tagIdx = firstLineLower.findIndex(h => h === 'tags' || h === 'tag' || h.includes('tag') || h.includes('category') || h.includes('label'));
+    }
+
+    const startIndex = hasHeader ? 1 : 0;
+
     for (let i = startIndex; i < lines.length; i++) {
       const line = lines[i].trim();
       if (!line) continue;
 
-      let parts = [];
-      if (delimiter === '\t') {
-        parts = line.split('\t');
-      } else if (delimiter === '|') {
-        parts = line.split('|');
+      const parts = parseCSVLine(line, delimiter);
+      if (parts.length === 0) continue;
+
+      let name = '';
+      let phone = '';
+      let tag = '';
+
+      if (hasHeader && phoneIdx !== -1) {
+        // We know the exact column indices from the header!
+        name = nameIdx !== -1 && parts[nameIdx] !== undefined ? parts[nameIdx].trim() : '';
+        phone = cleanPhoneNumber(parts[phoneIdx]);
+        
+        if (tagIdx !== -1 && parts[tagIdx] !== undefined && parts[tagIdx].trim()) {
+          tag = parts[tagIdx].trim();
+        } else {
+          // If tag column is empty on this row, check pipeline / status
+          const pipelineIdx = firstLineLower.findIndex(h => h.includes('pipeline') || h.includes('stage'));
+          if (pipelineIdx !== -1 && parts[pipelineIdx] && parts[pipelineIdx] !== 'new') {
+            tag = parts[pipelineIdx].trim();
+          }
+        }
       } else {
-        // Handle CSV quotes
-        parts = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(p => p.replace(/^"|"$/g, '').trim());
-      }
-
-      if (parts.length >= 1) {
-        let name = '';
-        let phone = '';
-        let tag = '';
-
+        // Heuristic fallback when no header is present
         if (parts.length === 1) {
-          // If only 1 column, check if phone
           const cleaned = cleanPhoneNumber(parts[0]);
           if (cleaned.length >= 8) {
             phone = cleaned;
             name = 'Prospect ' + (i + 1);
           }
         } else if (parts.length === 2) {
-          // If 2 columns: Column 1 could be Name, Column 2 Phone (or vice-versa)
           const p0Clean = cleanPhoneNumber(parts[0]);
           const p1Clean = cleanPhoneNumber(parts[1]);
-
           if (p1Clean.length >= 8 && p0Clean.length < 8) {
             name = parts[0].trim();
             phone = p1Clean;
@@ -92,20 +134,50 @@ export default function BulkImportModal({ isOpen, onClose, onSuccess, defaultCal
             name = parts[0].trim();
             phone = p1Clean || p0Clean;
           }
-        } else {
-          // 3 or more columns: Name, Phone, Tag
+        } else if (parts.length === 3) {
           name = parts[0].trim();
           phone = cleanPhoneNumber(parts[1]);
-          tag = parts[2].trim();
-        }
+          if (!parts[2].includes('@')) {
+            tag = parts[2].trim();
+          }
+        } else {
+          // 4 or more columns:
+          // Format like: Name, Phone, Email, Status, Tags, Pipeline, Added
+          name = parts[0].trim();
+          phone = cleanPhoneNumber(parts[1]);
 
-        if (phone) {
-          results.push({
-            name: name || 'Prospect',
-            phone,
-            tag: tag || defaultTag || ''
-          });
+          if (parts[4] !== undefined && parts[4].trim()) {
+            tag = parts[4].trim(); // Tags column!
+          } else if (parts[2] !== undefined && !parts[2].includes('@') && parts[2].trim()) {
+            tag = parts[2].trim();
+          } else if (parts[5] !== undefined && parts[5].trim() && parts[5] !== 'new') {
+            tag = parts[5].trim();
+          }
         }
+      }
+
+      // If phone wasn't in expected column, look for a 8-14 digit number in any column
+      if (!phone || phone.length < 8) {
+        for (let p of parts) {
+          const c = cleanPhoneNumber(p);
+          if (c.length >= 8 && c.length <= 14) {
+            phone = c;
+            break;
+          }
+        }
+      }
+
+      // Fallback name
+      if (!name || name === phone) {
+        name = 'Prospect ' + phone;
+      }
+
+      if (phone && phone.length >= 8) {
+        results.push({
+          name: name.trim(),
+          phone,
+          tag: tag ? tag.trim() : (defaultTag ? defaultTag.trim() : '')
+        });
       }
     }
 
