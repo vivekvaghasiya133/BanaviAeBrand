@@ -654,7 +654,7 @@ app.post('/api/admin/registrations/:id/followups', async (req, res) => {
         $push: { followUpHistory: newFollowUp },
         $set: updateFields
       },
-      { new: true } // Return updated document
+      { returnDocument: 'after' }
     );
 
     if (updatedReg) {
