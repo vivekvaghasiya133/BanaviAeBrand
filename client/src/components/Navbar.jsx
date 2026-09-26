@@ -44,6 +44,16 @@ export default function Navbar({ onOpenOnboarding }) {
     { name: 'Slavista', metric: '0 → 1 Launch', cat: 'Branding & 3D' },
   ];
 
+  const handleBookSlot = (e) => {
+    e?.preventDefault?.();
+    const el = document.getElementById('register');
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth' });
+    } else {
+      window.location.href = '#register';
+    }
+  };
+
   return (
     <header
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
@@ -72,7 +82,7 @@ export default function Navbar({ onOpenOnboarding }) {
               height: '42px',
               transform: 'translate(-50%, -50%) rotate(-12deg)',
               borderRadius: '50%',
-              border: '1px dashed rgba(191,255,0,0.6)',
+              border: '1px dashed rgba(59,130,246,0.6)',
               animation: 'logo-orbit-spin 6s linear infinite',
             }}
           >
@@ -84,8 +94,8 @@ export default function Navbar({ onOpenOnboarding }) {
                 width: '8px',
                 height: '8px',
                 borderRadius: '50%',
-                background: 'radial-gradient(circle at 30% 30%, #fff 0%, #3B82F6 50%, #5e7c00 100%)',
-                boxShadow: '0 0 8px #3B82F6, 0 0 16px rgba(191,255,0,0.8)',
+                background: 'radial-gradient(circle at 30% 30%, #fff 0%, #3B82F6 50%, #1d4ed8 100%)',
+                boxShadow: '0 0 8px #3B82F6, 0 0 16px rgba(59,130,246,0.8)',
                 transform: 'translate(-50%, -50%)',
               }}
             />
@@ -105,7 +115,7 @@ export default function Navbar({ onOpenOnboarding }) {
           {/* Easter egg toast */}
           {easterEggActive && (
             <div className="absolute top-12 left-0 bg-[#3B82F6] text-black text-xs font-black px-3 py-1.5 rounded-md whitespace-nowrap shadow-[0_0_20px_#3B82F6] animate-bounce z-50">
-              ⚡ Secret Unlocked! Miami AI Matrix Active!
+              ⚡ Secret Unlocked! BanaviAeBrand Action Matrix!
             </div>
           )}
         </div>
@@ -152,49 +162,16 @@ export default function Navbar({ onOpenOnboarding }) {
             )}
           </div>
 
-          {/* Case Studies Dropdown */}
-          <div
-            className="relative"
-            onMouseEnter={() => setCasesOpen(true)}
-            onMouseLeave={() => setCasesOpen(false)}
+          <a
+            href="#workshops"
+            className="px-3 py-2 rounded-lg text-white/75 hover:text-white transition-colors duration-200"
+            onClick={(e) => {
+              e.preventDefault();
+              document.getElementById('workshops')?.scrollIntoView({ behavior: 'smooth' });
+            }}
           >
-            <button
-              className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-white/75 hover:text-white transition-colors duration-200"
-              onClick={() => {
-                document.getElementById('portfolio')?.scrollIntoView({ behavior: 'smooth' });
-              }}
-            >
-              <span>Case Studies</span>
-              <ChevronDown
-                size={14}
-                className={`transition-transform duration-200 ${casesOpen ? 'rotate-180 text-[#3B82F6]' : ''}`}
-              />
-            </button>
-
-            {casesOpen && (
-              <div className="absolute top-full left-0 w-72 pt-2 z-50 animate-fadeIn">
-                <div className="bg-[#0A0A0F]/95 backdrop-blur-xl border border-white/10 rounded-xl p-3 shadow-2xl space-y-1">
-                  {caseStudiesList.map((cs, idx) => (
-                    <a
-                      key={idx}
-                      href="#selected-work"
-                      className="block p-2.5 rounded-lg hover:bg-white/[0.06] transition-colors group"
-                    >
-                      <div className="flex items-center justify-between">
-                        <span className="text-white text-xs font-semibold group-hover:text-[#3B82F6]">
-                          {cs.name}
-                        </span>
-                        <span className="text-[10px] font-bold text-[#3B82F6] bg-[#3B82F6]/10 px-1.5 py-0.5 rounded">
-                          {cs.metric}
-                        </span>
-                      </div>
-                      <div className="text-[10px] text-white/40 mt-0.5">{cs.cat}</div>
-                    </a>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
+            Workshops
+          </a>
 
           <a
             href="#team"
@@ -202,13 +179,15 @@ export default function Navbar({ onOpenOnboarding }) {
           >
             Team
           </a>
+
           <a
-            href="#maya"
-            className="px-3 py-2 rounded-lg text-white/75 hover:text-white transition-colors duration-200 flex items-center gap-1.5"
+            href="#register"
+            onClick={handleBookSlot}
+            className="px-3 py-2 rounded-lg text-white/75 hover:text-white transition-colors duration-200"
           >
-            <span>AI Employees</span>
-            <span className="w-1.5 h-1.5 rounded-full bg-[#3B82F6] animate-pulse" />
+            Apply
           </a>
+
           <a
             href="#footer"
             className="px-3 py-2 rounded-lg text-white/75 hover:text-white transition-colors duration-200"
@@ -217,12 +196,12 @@ export default function Navbar({ onOpenOnboarding }) {
           </a>
         </div>
 
-        {/* Start Your Project CTA Button */}
+        {/* Start Your Project / Book Slot CTA Button */}
         <div className="hidden md:flex items-center">
           <button
-            onClick={onOpenOnboarding}
+            onClick={handleBookSlot}
             data-cursor-label="Let's Go"
-            className="px-5 py-2 rounded-lg bg-[#3B82F6] text-[#0A0A0F] text-sm font-bold tracking-wide hover:bg-[#2563EB] hover:shadow-[0_0_20px_rgba(59,130,246,0.5)] transition-all duration-300 transform hover:-translate-y-0.5 active:translate-y-0"
+            className="px-5 py-2 rounded-lg bg-[#3B82F6] text-black text-sm font-bold tracking-wide hover:bg-[#2563EB] hover:shadow-[0_0_20px_rgba(59,130,246,0.5)] transition-all duration-300 transform hover:-translate-y-0.5 active:translate-y-0"
           >
             Book Slot
           </button>
@@ -244,10 +223,23 @@ export default function Navbar({ onOpenOnboarding }) {
           <div className="flex flex-col gap-3 text-base font-medium">
             <a
               href="#services"
-              onClick={() => setMobileMenuOpen(false)}
+              onClick={() => {
+                setMobileMenuOpen(false);
+                document.getElementById('services')?.scrollIntoView({ behavior: 'smooth' });
+              }}
               className="text-white/80 hover:text-[#3B82F6] py-2 border-b border-white/5"
             >
               Services
+            </a>
+            <a
+              href="#workshops"
+              onClick={() => {
+                setMobileMenuOpen(false);
+                document.getElementById('workshops')?.scrollIntoView({ behavior: 'smooth' });
+              }}
+              className="text-white/80 hover:text-[#3B82F6] py-2 border-b border-white/5"
+            >
+              Workshops
             </a>
             <a
               href="#team"
@@ -258,7 +250,10 @@ export default function Navbar({ onOpenOnboarding }) {
             </a>
             <a
               href="#register"
-              onClick={() => setMobileMenuOpen(false)}
+              onClick={(e) => {
+                setMobileMenuOpen(false);
+                handleBookSlot(e);
+              }}
               className="text-white/80 hover:text-[#3B82F6] py-2 border-b border-white/5 flex items-center justify-between"
             >
               <span>Apply Now</span>
@@ -273,9 +268,9 @@ export default function Navbar({ onOpenOnboarding }) {
           </div>
 
           <button
-            onClick={() => {
+            onClick={(e) => {
               setMobileMenuOpen(false);
-              onOpenOnboarding();
+              handleBookSlot(e);
             }}
             className="w-full py-3 rounded-lg bg-[#3B82F6] text-black font-bold text-center mt-4 shadow-[0_0_20px_rgba(59,130,246,0.4)]"
           >

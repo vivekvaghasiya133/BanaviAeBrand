@@ -47,10 +47,14 @@ export default function Footer({ onOpenOnboarding }) {
           </div>
 
           <button
-            onClick={onOpenOnboarding}
-            className="px-8 py-4 rounded-xl bg-[#3B82F6] text-black font-black text-sm uppercase tracking-wider hover:bg-[#2563EB] shadow-[0_0_25px_rgba(191,255,0,0.4)] transition-all flex items-center gap-2 whitespace-nowrap"
+            onClick={() => {
+              const el = document.getElementById('register');
+              if (el) el.scrollIntoView({ behavior: 'smooth' });
+              else window.location.href = '#register';
+            }}
+            className="px-8 py-4 rounded-xl bg-[#3B82F6] text-black font-black text-sm uppercase tracking-wider hover:bg-[#2563EB] shadow-[0_0_25px_rgba(59,130,246,0.4)] transition-all flex items-center gap-2 whitespace-nowrap"
           >
-            <span>Start Your Project</span>
+            <span>Book Your Slot</span>
             <ArrowUpRight size={18} />
           </button>
         </div>

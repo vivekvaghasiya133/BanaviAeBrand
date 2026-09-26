@@ -102,9 +102,10 @@ export default function RegistrationForm() {
       
       <div className="mb-8 text-center">
         <h2 className="text-3xl font-black text-white mb-2 uppercase tracking-tight">APPLY FOR BANAVIAEBRAND</h2>
-        {slotsLeft !== null && (
-          <p className="text-white/60 text-sm">માત્ર <strong className="text-[#3B82F6]">{slotsLeft}</strong> સ્લોટ બાકી છે. વહેલા તે પહેલાના ધોરણે રજીસ્ટ્રેશન.</p>
-        )}
+        <p className="text-red-400 text-sm font-bold flex items-center justify-center gap-2 mt-1">
+          <span className="w-2 h-2 rounded-full bg-red-500 animate-ping"></span>
+          માત્ર 5 સીટો ઉપલબ્ધ છે (Hurry! Only 5 seats available). વહેલા તે પહેલાના ધોરણે રજીસ્ટ્રેશન.
+        </p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-5">

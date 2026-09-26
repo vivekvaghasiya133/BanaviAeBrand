@@ -35,17 +35,19 @@ const workshopSchema = new mongoose.Schema({
 
 const registrationSchema = new mongoose.Schema({
   name: { type: String, required: true },
-  email: { type: String, required: true },
+  email: { type: String, default: '' },
   phone: { type: String, required: true },
-  city: { type: String, required: true },
-  instagramHandle: { type: String },
-  profession: { type: String, required: true },
-  whyJoin: { type: String, required: true },
-  interestArea: { type: String, required: true },
-  socialExperience: { type: String, required: true },
-  editingExperience: { type: String, required: true },
-  participationAgreement: { type: Boolean, required: true },
-  source: { type: String, required: true },
+  city: { type: String, default: '' },
+  instagramHandle: { type: String, default: '' },
+  profession: { type: String, default: 'General' },
+  whyJoin: { type: String, default: '' },
+  interestArea: { type: String, default: 'General' },
+  socialExperience: { type: String, default: 'Beginner' },
+  editingExperience: { type: String, default: 'No' },
+  participationAgreement: { type: Boolean, default: true },
+  source: { type: String, default: 'Direct' },
+  workshopId: { type: String, default: '' },
+  workshopDate: { type: String, default: '' },
   // CRM Follow-up Management Fields
   followUpHistory: [{
     outcome: String,
@@ -244,6 +246,67 @@ app.get('/api/admin/registrations', async (req, res) => {
   } catch (error) {
     console.error('Error fetching registrations:', error);
     res.status(500).json({ success: false, error: 'Server error' });
+  }
+});
+
+// Admin: Add a Manual Lead
+app.post('/api/admin/registrations', async (req, res) => {
+  try {
+    const { 
+      name, phone, email, city, instagramHandle, profession,
+      interestArea, source, outcome, callerName, nextFollowUpDate, note,
+      workshopDate
+    } = req.body;
+
+    if (!name || !phone) {
+      return res.status(400).json({ success: false, error: 'Name and Phone number are required.' });
+    }
+
+    const followUpHistory = [];
+    if (outcome || note || nextFollowUpDate) {
+      followUpHistory.push({
+        outcome: outcome || 'Call Again',
+        callerName: callerName || 'Admin',
+        nextFollowUpDate: nextFollowUpDate || '',
+        note: note || 'Lead created manually',
+        createdAt: new Date()
+      });
+    }
+
+    const newReg = new Registration({
+      name: name.trim(),
+      phone: phone.trim(),
+      email: (email || '').trim(),
+      city: (city || '').trim(),
+      instagramHandle: (instagramHandle || '').trim(),
+      profession: (profession || 'Business / Creator').trim(),
+      whyJoin: req.body.whyJoin || 'Manual lead entry',
+      interestArea: interestArea || 'General',
+      socialExperience: req.body.socialExperience || 'Beginner',
+      editingExperience: req.body.editingExperience || 'No',
+      participationAgreement: true,
+      source: (source || 'Manual Entry').trim(),
+      workshopDate: (workshopDate || '').trim(),
+      followUpHistory,
+      latestOutcome: outcome || 'Call Again',
+      latestNextFollowUpDate: nextFollowUpDate || '',
+      latestCallerName: (callerName || 'Admin').trim(),
+      createdAt: new Date()
+    });
+
+    await newReg.save();
+    console.log('✅ Manual Lead Created:', newReg.name, newReg.phone);
+
+    res.json({
+      success: true,
+      data: {
+        ...newReg.toObject(),
+        id: newReg._id.toString()
+      }
+    });
+  } catch (error) {
+    console.error('Error creating manual lead:', error);
+    res.status(500).json({ success: false, error: error.message || 'Server error creating manual lead' });
   }
 });
 

@@ -305,10 +305,13 @@ export default function HeroSolarSystem({ onOpenOnboarding }) {
       >
         <div className="flex flex-col items-start w-full max-w-4xl" style={{ pointerEvents: 'auto' }}>
           {/* Tagline */}
-          <div className="flex items-center justify-start gap-3 mb-6 lg:mb-10">
+          <div className="flex flex-wrap items-center justify-start gap-3 mb-6 lg:mb-10">
             <span className="w-10 h-px bg-[#3B82F6]" />
             <span className="text-[#3B82F6] text-xs font-bold tracking-[0.4em] uppercase">
-              બનાવીએ બ્રાન્ડ · લિમિટેડ બેચ
+              બનાવીએ બ્રાન્ડ · ONLY 5 SEATS AVAILABLE
+            </span>
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-500/10 border border-red-500/30 text-red-400 text-[11px] font-black uppercase tracking-wider animate-pulse shadow-[0_0_12px_rgba(239,68,68,0.3)]">
+              🔥 Only 5 Seats Left
             </span>
           </div>
 

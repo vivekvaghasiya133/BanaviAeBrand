@@ -20,8 +20,9 @@ export default function FinalCTA() {
 
         <div className="mb-12">
           <div className="text-6xl md:text-8xl font-black tracking-tighter mb-2">₹10,000</div>
-          <div className="text-lg font-bold uppercase tracking-widest bg-black text-[#3B82F6] inline-block px-4 py-1 rounded-sm">
-            FOUNDING 30 — ONLY 30 SEATS
+          <div className="text-lg font-bold uppercase tracking-widest bg-black text-[#3B82F6] inline-flex items-center gap-2 px-4 py-1.5 rounded-sm border border-[#3B82F6]/40 shadow-[0_0_15px_rgba(59,130,246,0.3)]">
+            <span className="w-2 h-2 rounded-full bg-red-500 animate-ping"></span>
+            FOUNDING BATCH — ONLY 5 SEATS AVAILABLE
           </div>
         </div>
 
