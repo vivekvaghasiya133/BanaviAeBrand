@@ -397,18 +397,21 @@ export default function HeroSolarSystem({ onOpenOnboarding }) {
                   const el = document.getElementById('register');
                   if (el) {
                     el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    window.dispatchEvent(new CustomEvent('selectWorkshop', { 
+                      detail: { workshopDate: '4th October' } 
+                    }));
                     setTimeout(() => {
-                      const input = el.querySelector('input');
+                      const input = el.querySelector('input[name="name"]') || el.querySelector('input');
                       if (input) input.focus({ preventScroll: true });
                     }, 500);
                   } else {
                     window.location.href = '#register';
                   }
                 }}
-                data-cursor-label="Book Slot"
+                data-cursor-label="Book 4th Oct"
                 className="group flex items-center gap-3 px-8 py-4 bg-[#3B82F6] text-white font-black rounded-full hover:bg-white hover:text-black transition-all duration-300 hover:scale-105 shadow-[0_0_40px_rgba(59,130,246,0.3)] text-sm uppercase tracking-wider cursor-pointer"
               >
-                <span>Book Slot (5 Seats Left)</span>
+                <span>Book Slot (4th Oct · 5 Seats Left)</span>
                 <svg
                   width="14"
                   height="14"

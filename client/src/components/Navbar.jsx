@@ -44,8 +44,11 @@ export default function Navbar({ onOpenOnboarding }) {
     const el = document.getElementById('register');
     if (el) {
       el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      window.dispatchEvent(new CustomEvent('selectWorkshop', { 
+        detail: { workshopDate: '4th October' } 
+      }));
       setTimeout(() => {
-        const input = el.querySelector('input');
+        const input = el.querySelector('input[name="name"]') || el.querySelector('input');
         if (input) input.focus({ preventScroll: true });
       }, 500);
     } else {
@@ -57,11 +60,34 @@ export default function Navbar({ onOpenOnboarding }) {
     <header
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         scrolled
-          ? 'bg-[#050507]/90 backdrop-blur-md border-b border-white/[0.08] shadow-2xl py-3'
-          : 'bg-transparent py-4'
+          ? 'bg-[#050507]/95 backdrop-blur-md border-b border-white/[0.08] shadow-2xl'
+          : 'bg-[#050507]/85 backdrop-blur-md border-b border-white/5'
       }`}
     >
-      <nav className="max-w-7xl mx-auto px-6 h-12 flex items-center justify-between relative">
+      {/* 4th Oct Top Announcement Bar */}
+      <div 
+        onClick={handleBookSlot}
+        className="w-full bg-gradient-to-r from-blue-950/90 via-indigo-950/90 to-blue-950/90 border-b border-blue-500/20 py-1.5 px-4 cursor-pointer hover:border-blue-500/50 transition-all group"
+      >
+        <div className="max-w-7xl mx-auto flex items-center justify-center gap-2 sm:gap-3 text-xs sm:text-sm">
+          <span className="relative flex h-2 w-2">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+          </span>
+          <span className="text-white/90 font-medium">
+            Next Batch: <strong className="text-white font-extrabold">4th October Workshop (Surat)</strong>
+          </span>
+          <span className="text-white/20 hidden sm:inline">|</span>
+          <span className="bg-red-500/20 border border-red-500/30 text-red-400 px-2 py-0.5 rounded-full text-[11px] sm:text-xs font-black uppercase tracking-wider animate-pulse">
+            🔥 Only 5 Seats Available
+          </span>
+          <span className="text-[#3B82F6] font-bold inline-flex items-center gap-1 group-hover:text-white transition-colors ml-1">
+            Register Now <ArrowRight size={12} className="group-hover:translate-x-1 transition-transform" />
+          </span>
+        </div>
+      </div>
+
+      <nav className="max-w-7xl mx-auto px-6 h-14 flex items-center justify-between relative">
         {/* Logo with interactive orbit */}
         <div
           className="relative flex items-center"
@@ -199,10 +225,11 @@ export default function Navbar({ onOpenOnboarding }) {
         <div className="hidden md:flex items-center">
           <button
             onClick={handleBookSlot}
-            data-cursor-label="Let's Go"
-            className="px-5 py-2 rounded-lg bg-[#3B82F6] text-black text-sm font-bold tracking-wide hover:bg-[#2563EB] hover:shadow-[0_0_20px_rgba(59,130,246,0.5)] transition-all duration-300 transform hover:-translate-y-0.5 active:translate-y-0"
+            data-cursor-label="Book 4th Oct"
+            className="px-4 py-2 rounded-lg bg-[#3B82F6] text-black text-sm font-bold tracking-wide hover:bg-[#2563EB] hover:shadow-[0_0_20px_rgba(59,130,246,0.5)] transition-all duration-300 transform hover:-translate-y-0.5 active:translate-y-0 flex items-center gap-2"
           >
-            Book Slot
+            <span>Book Slot (4th Oct)</span>
+            <span className="w-1.5 h-1.5 rounded-full bg-red-600 animate-ping" />
           </button>
         </div>
 
@@ -271,9 +298,10 @@ export default function Navbar({ onOpenOnboarding }) {
               setMobileMenuOpen(false);
               handleBookSlot(e);
             }}
-            className="w-full py-3 rounded-lg bg-[#3B82F6] text-black font-bold text-center mt-4 shadow-[0_0_20px_rgba(59,130,246,0.4)]"
+            className="w-full py-3.5 rounded-xl bg-[#3B82F6] text-black font-extrabold text-center mt-4 shadow-[0_0_20px_rgba(59,130,246,0.4)] flex items-center justify-center gap-2"
           >
-            Book Slot
+            <span>Book Slot (4th Oct — 5 Seats Left)</span>
+            <span className="w-2 h-2 rounded-full bg-red-600 animate-ping" />
           </button>
         </div>
       )}

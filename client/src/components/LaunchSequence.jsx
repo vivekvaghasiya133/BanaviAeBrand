@@ -1,10 +1,31 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Lightbulb, Video, Scissors, Share2, Target, CheckCircle2, Sparkles } from 'lucide-react';
+import { Lightbulb, Video, Scissors, Share2, Target, CheckCircle2, Sparkles, ArrowRight } from 'lucide-react';
 
 export default function LaunchSequence() {
   const [activeTab, setActiveTab] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
   const timerRef = useRef(null);
+
+  const handleRegisterClick = (e) => {
+    e?.preventDefault?.();
+    if (window.location.pathname !== '/') {
+      window.location.href = '/#register';
+      return;
+    }
+    const el = document.getElementById('register');
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      window.dispatchEvent(new CustomEvent('selectWorkshop', { 
+        detail: { workshopDate: '4th October' } 
+      }));
+      setTimeout(() => {
+        const input = el.querySelector('input[name="name"]') || el.querySelector('input');
+        if (input) input.focus({ preventScroll: true });
+      }, 500);
+    } else {
+      window.location.hash = 'register';
+    }
+  };
 
   const pillars = [
     {
@@ -65,7 +86,7 @@ export default function LaunchSequence() {
   }, [isHovered, pillars.length]);
 
   return (
-    <section id="curriculum" className="relative bg-[#050507] text-white py-24 md:py-32 border-t border-white/10 overflow-hidden">
+    <section id="curriculum" className="relative bg-[#050507] text-white pt-28 md:pt-36 pb-24 md:pb-32 border-t border-white/10 overflow-hidden">
       {/* Background dynamic glow based on active tab */}
       <div 
         className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full filter blur-[120px] pointer-events-none transition-colors duration-1000 opacity-20"
@@ -74,9 +95,37 @@ export default function LaunchSequence() {
 
       <div className="max-w-7xl mx-auto px-6 relative z-10">
         <div className="text-center max-w-3xl mx-auto mb-16">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.05] border border-white/10 text-white/70 text-xs font-mono uppercase tracking-widest mb-4">
-            <Sparkles size={12} className="text-[#3B82F6]" />
-            <span>The Curriculum</span>
+          {/* 4th Oct Workshop Highlight Banner */}
+          <div 
+            onClick={handleRegisterClick}
+            data-cursor-label="Register"
+            className="inline-flex flex-wrap items-center justify-center gap-2.5 sm:gap-3.5 px-5 sm:px-7 py-3 rounded-full bg-gradient-to-r from-blue-600/20 via-purple-600/25 to-red-500/20 border border-blue-500/40 hover:border-blue-400 shadow-[0_0_30px_rgba(59,130,246,0.35)] hover:shadow-[0_0_45px_rgba(59,130,246,0.55)] transition-all duration-300 cursor-pointer group mb-6 transform hover:-translate-y-0.5 active:translate-y-0"
+          >
+            <span className="flex items-center gap-2 text-xs sm:text-sm font-black text-white tracking-wide">
+              <span className="relative flex h-2.5 w-2.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500"></span>
+              </span>
+              <span>4th October Live Workshop — Registration Open</span>
+            </span>
+
+            <span className="text-white/20 hidden sm:inline">|</span>
+
+            <span className="px-3 py-1 rounded-full bg-red-500/20 border border-red-500/40 text-red-400 text-xs font-black tracking-wider uppercase animate-pulse">
+              🔥 Only 5 Seats Available
+            </span>
+
+            <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-[#3B82F6] text-black font-black text-xs uppercase tracking-wider group-hover:bg-white group-hover:scale-105 transition-all duration-200 shadow-md">
+              Register Now
+              <ArrowRight size={13} className="group-hover:translate-x-1 transition-transform" />
+            </span>
+          </div>
+
+          <div className="flex items-center justify-center gap-2 mb-4">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.05] border border-white/10 text-white/70 text-xs font-mono uppercase tracking-widest">
+              <Sparkles size={12} className="text-[#3B82F6]" />
+              <span>The Curriculum</span>
+            </div>
           </div>
 
           <h2 className="text-4xl sm:text-6xl md:text-7xl font-black tracking-tight uppercase leading-[0.9]">

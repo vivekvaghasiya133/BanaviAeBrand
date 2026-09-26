@@ -30,6 +30,16 @@ export default function RegistrationForm() {
       .then(data => {
         if (data && data.success) {
           setWorkshops(data.data);
+          // Auto-select 4th October workshop or first available
+          setFormData(prev => {
+            if (prev.workshopId) return prev;
+            const octWs = data.data.find(w => 
+              (w.date.toLowerCase().includes('4th oct') || w.date.toLowerCase().includes('oct')) && !w.isFull
+            );
+            if (octWs) return { ...prev, workshopId: octWs.id };
+            if (data.data.length > 0) return { ...prev, workshopId: data.data[0].id };
+            return prev;
+          });
         }
         setLoadingWorkshops(false);
       })
@@ -41,6 +51,16 @@ export default function RegistrationForm() {
     const handleSelectWs = (e) => {
       if (e.detail?.workshopId) {
         setFormData(prev => ({ ...prev, workshopId: e.detail.workshopId }));
+      } else if (e.detail?.workshopDate) {
+        setWorkshops(curr => {
+          const matched = curr.find(w => 
+            w.date.toLowerCase().includes(e.detail.workshopDate.toLowerCase())
+          );
+          if (matched) {
+            setFormData(prev => ({ ...prev, workshopId: matched.id }));
+          }
+          return curr;
+        });
       }
     };
     window.addEventListener('selectWorkshop', handleSelectWs);
@@ -112,7 +132,7 @@ export default function RegistrationForm() {
         <h2 className="text-3xl font-black text-white mb-2 uppercase tracking-tight">APPLY FOR BANAVIAEBRAND</h2>
         <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-red-500/10 border border-red-500/30 rounded-full text-red-400 text-xs font-black uppercase tracking-wider mt-1 shadow-[0_0_15px_rgba(239,68,68,0.2)]">
           <span className="w-2 h-2 rounded-full bg-red-500 animate-ping"></span>
-          <span>માત્ર 5 સીટો ઉપલબ્ધ છે · ONLY 5 SEATS AVAILABLE</span>
+          <span>🔥 4TH OCTOBER WORKSHOP · માત્ર 5 સીટો ઉપલબ્ધ છે (ONLY 5 SEATS AVAILABLE)</span>
         </div>
         <p className="text-white/50 text-xs mt-2 uppercase tracking-wider font-semibold">
           વહેલા તે પહેલાના ધોરણે રજીસ્ટ્રેશન (First Come, First Served)

@@ -56,8 +56,11 @@ export default function PricingSection() {
                 const el = document.getElementById('register');
                 if (el) {
                   el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  window.dispatchEvent(new CustomEvent('selectWorkshop', { 
+                    detail: { workshopDate: '4th October' } 
+                  }));
                   setTimeout(() => {
-                    const input = el.querySelector('input');
+                    const input = el.querySelector('input[name="name"]') || el.querySelector('input');
                     if (input) input.focus({ preventScroll: true });
                   }, 500);
                 } else {
@@ -66,11 +69,11 @@ export default function PricingSection() {
               }}
               className="px-10 py-5 bg-[#3B82F6] text-black text-lg md:text-xl font-black rounded-xl hover:bg-[#2563EB] transition-colors uppercase tracking-wider w-full md:w-auto shadow-[0_0_30px_rgba(59,130,246,0.3)] hover:scale-105 duration-300 cursor-pointer"
             >
-              BOOK YOUR SLOT (5 SEATS ONLY)
+              BOOK YOUR SLOT — 4TH OCT (5 SEATS ONLY)
             </button>
             <p className="text-red-400 mt-4 text-sm font-bold uppercase tracking-widest flex items-center justify-center gap-2">
               <span className="w-2 h-2 rounded-full bg-red-500 animate-ping"></span>
-              Hurry! Only 5 seats available for this batch.
+              Hurry! Only 5 seats available for 4th October batch.
             </p>
           </div>
         </div>
