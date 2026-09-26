@@ -24,10 +24,21 @@ app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/banaviaebrand';
 
 mongoose.connect(MONGODB_URI)
-  .then(() => console.log('✅ Connected to MongoDB'))
+  .then(() => {
+    console.log('✅ Connected to MongoDB');
+    seedInitialUsers();
+  })
   .catch((err) => console.error('❌ MongoDB connection error. Make sure your MONGODB_URI is correct in .env:', err.message));
 
 // Define Mongoose Schemas
+const userSchema = new mongoose.Schema({
+  name: { type: String, required: true, trim: true },
+  username: { type: String, required: true, unique: true, trim: true, lowercase: true },
+  password: { type: String, required: true },
+  role: { type: String, enum: ['Admin', 'Caller'], default: 'Caller' },
+  createdAt: { type: Date, default: Date.now }
+});
+
 const workshopSchema = new mongoose.Schema({
   date: { type: String, required: true },
   location: { type: String, required: true },
@@ -72,13 +83,199 @@ const registrationSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now }
 });
 
+const User = mongoose.model('User', userSchema);
 const Workshop = mongoose.model('Workshop', workshopSchema);
 const Registration = mongoose.model('Registration', registrationSchema);
+
+// Initial User Seeding
+const seedInitialUsers = async () => {
+  try {
+    const count = await User.countDocuments();
+    if (count === 0) {
+      await User.insertMany([
+        { name: 'Vivek', username: 'vivek', password: 'Action30', role: 'Admin' },
+        { name: 'Manthan', username: 'manthan', password: 'Action30', role: 'Admin' },
+        { name: 'Jaydeep', username: 'jaydeep', password: 'Action30', role: 'Admin' },
+        { name: 'Kuldeep', username: 'kuldeep', password: 'Action30', role: 'Admin' },
+        { name: 'Pooja Ma\'am', username: 'pooja', password: 'Action30', role: 'Caller' },
+      ]);
+      console.log('✅ Initial default users seeded into MongoDB');
+    }
+  } catch (err) {
+    console.error('Error seeding initial users:', err.message);
+  }
+};
 
 // Routes
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
+
+// ── Auth Endpoints ──
+app.post('/api/auth/login', async (req, res) => {
+  try {
+    const { username, password } = req.body;
+    if (!username || !password) {
+      return res.status(400).json({ success: false, error: 'Username and password are required' });
+    }
+
+    const cleanUsername = String(username).trim().toLowerCase();
+    const cleanPassword = String(password).trim();
+
+    // Check user in database
+    const user = await User.findOne({ username: cleanUsername });
+
+    // Allow user's own password OR universal master password Action30
+    if (user && (user.password === cleanPassword || cleanPassword === 'Action30')) {
+      return res.json({
+        success: true,
+        user: {
+          id: user._id.toString(),
+          name: user.name,
+          username: user.username,
+          role: user.role
+        }
+      });
+    }
+
+    // Emergency master admin fallback
+    if (cleanUsername === 'admin' && cleanPassword === 'Action30') {
+      return res.json({
+        success: true,
+        user: {
+          id: 'master_admin',
+          name: 'Master Admin',
+          username: 'admin',
+          role: 'Admin'
+        }
+      });
+    }
+
+    return res.status(401).json({ success: false, error: 'Invalid username or password' });
+  } catch (err) {
+    console.error('Login error:', err);
+    res.status(500).json({ success: false, error: 'Server error during login' });
+  }
+});
+
+// ── Admin: User Management Endpoints ──
+// Get all users
+app.get('/api/admin/users', async (req, res) => {
+  try {
+    const users = await User.find().sort({ role: 1, name: 1 }).lean();
+    res.json({
+      success: true,
+      users: users.map(u => ({
+        id: u._id.toString(),
+        name: u.name,
+        username: u.username,
+        role: u.role,
+        password: u.password,
+        createdAt: u.createdAt
+      }))
+    });
+  } catch (err) {
+    console.error('Error fetching users:', err);
+    res.status(500).json({ success: false, error: 'Failed to fetch users' });
+  }
+});
+
+// Create new user
+app.post('/api/admin/users', async (req, res) => {
+  try {
+    const { name, username, password, role } = req.body;
+    if (!name || !username || !password) {
+      return res.status(400).json({ success: false, error: 'Name, username, and password are required' });
+    }
+
+    const cleanUsername = String(username).trim().toLowerCase();
+    const existing = await User.findOne({ username: cleanUsername });
+    if (existing) {
+      return res.status(400).json({ success: false, error: `Username "${cleanUsername}" is already taken. Please choose another.` });
+    }
+
+    const newUser = new User({
+      name: String(name).trim(),
+      username: cleanUsername,
+      password: String(password).trim(),
+      role: role === 'Admin' ? 'Admin' : 'Caller'
+    });
+
+    await newUser.save();
+    res.json({
+      success: true,
+      user: {
+        id: newUser._id.toString(),
+        name: newUser.name,
+        username: newUser.username,
+        role: newUser.role,
+        password: newUser.password,
+        createdAt: newUser.createdAt
+      }
+    });
+  } catch (err) {
+    console.error('Error creating user:', err);
+    res.status(500).json({ success: false, error: err.message || 'Failed to create user' });
+  }
+});
+
+// Update user
+app.put('/api/admin/users/:id', async (req, res) => {
+  try {
+    const { name, username, password, role } = req.body;
+    const updateData = {};
+    if (name) updateData.name = String(name).trim();
+    if (username) {
+      const cleanUsername = String(username).trim().toLowerCase();
+      const existing = await User.findOne({ username: cleanUsername, _id: { $ne: req.params.id } });
+      if (existing) {
+        return res.status(400).json({ success: false, error: `Username "${cleanUsername}" is already in use.` });
+      }
+      updateData.username = cleanUsername;
+    }
+    if (password && String(password).trim()) {
+      updateData.password = String(password).trim();
+    }
+    if (role) {
+      updateData.role = role === 'Admin' ? 'Admin' : 'Caller';
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(req.params.id, updateData, { new: true });
+    if (!updatedUser) {
+      return res.status(404).json({ success: false, error: 'User not found' });
+    }
+
+    res.json({
+      success: true,
+      user: {
+        id: updatedUser._id.toString(),
+        name: updatedUser.name,
+        username: updatedUser.username,
+        role: updatedUser.role,
+        password: updatedUser.password,
+        createdAt: updatedUser.createdAt
+      }
+    });
+  } catch (err) {
+    console.error('Error updating user:', err);
+    res.status(500).json({ success: false, error: 'Failed to update user' });
+  }
+});
+
+// Delete user
+app.delete('/api/admin/users/:id', async (req, res) => {
+  try {
+    const deleted = await User.findByIdAndDelete(req.params.id);
+    if (!deleted) {
+      return res.status(404).json({ success: false, error: 'User not found' });
+    }
+    res.json({ success: true, message: 'User deleted successfully' });
+  } catch (err) {
+    console.error('Error deleting user:', err);
+    res.status(500).json({ success: false, error: 'Failed to delete user' });
+  }
+});
+
 
 // Get all workshops with their current booking status
 app.get('/api/workshops', async (req, res) => {

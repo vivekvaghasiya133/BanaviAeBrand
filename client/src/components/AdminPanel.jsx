@@ -1,19 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Users, Search, Download, Trash2, Calendar, MapPin, Hash, Plus, PhoneCall, Award, CheckCircle2, Crown, User, RefreshCw, LogOut, Key, ShieldCheck, Check } from 'lucide-react';
+import { Users, Search, Download, Trash2, Calendar, MapPin, Hash, Plus, PhoneCall, Award, CheckCircle2, Crown, User, RefreshCw, LogOut, Key, ShieldCheck, Check, Shield, Lock, Eye, EyeOff } from 'lucide-react';
 import { API_URL } from '../config';
 import FollowupDashboard from './FollowupDashboard';
-
-// Predefined Team Members with individual PINs and Roles
-export const TEAM_MEMBERS = [
-  { id: 'vivek', name: 'Vivek', role: 'Admin', avatar: '👑', pin: '1111', badge: 'Admin' },
-  { id: 'manthan', name: 'Manthan', role: 'Admin', avatar: '👑', pin: '2222', badge: 'Admin' },
-  { id: 'jaydeep', name: 'Jaydeep', role: 'Admin', avatar: '👑', pin: '3333', badge: 'Admin' },
-  { id: 'kuldeep', name: 'Kuldeep', role: 'Admin', avatar: '👑', pin: '4444', badge: 'Admin' },
-  { id: 'pooja', name: 'Pooja Ma\'am', role: 'Calling Specialist', avatar: '📞', pin: '5555', badge: 'Calling Team' },
-];
+import UserManagement from './UserManagement';
 
 export default function AdminPanel() {
-  const [activeTab, setActiveTab] = useState('original'); // 'original' | 'coldcall' | 'confirmed' | 'admincall' | 'workshops'
+  const [activeTab, setActiveTab] = useState('original'); // 'original' | 'coldcall' | 'confirmed' | 'admincall' | 'workshops' | 'users'
 
   // Persistent Login & User Profile Session
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
@@ -28,9 +20,8 @@ export default function AdminPanel() {
     return localStorage.getItem('crm_caller_role') || 'Admin';
   });
 
-  const [selectedUser, setSelectedUser] = useState(() => {
-    const saved = localStorage.getItem('crm_active_caller') || 'Vivek';
-    return TEAM_MEMBERS.find(m => m.name.toLowerCase() === saved.toLowerCase()) || TEAM_MEMBERS[0];
+  const [currentUsername, setCurrentUsername] = useState(() => {
+    return localStorage.getItem('crm_username') || 'vivek';
   });
 
   const [callerInput, setCallerInput] = useState(() => {
@@ -38,6 +29,7 @@ export default function AdminPanel() {
   });
 
   const [isSwitchCallerOpen, setIsSwitchCallerOpen] = useState(false);
+  const [teamUsers, setTeamUsers] = useState([]);
 
   // Registrations state
   const [registrations, setRegistrations] = useState([]);
@@ -49,16 +41,32 @@ export default function AdminPanel() {
   const [loadingWorkshops, setLoadingWorkshops] = useState(true);
   const [newWorkshop, setNewWorkshop] = useState({ date: '', location: '', maxSlots: 30 });
 
-  // Auth inputs
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  // Login inputs
+  const [loginUsername, setLoginUsername] = useState('');
+  const [loginPassword, setLoginPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [loginError, setLoginError] = useState('');
 
   useEffect(() => {
     if (isAuthenticated) {
       fetchRegistrations();
       fetchWorkshops();
+      fetchUsers();
     }
   }, [isAuthenticated]);
+
+  const fetchUsers = async () => {
+    try {
+      const res = await fetch(`${API_URL}/api/admin/users`);
+      const data = await res.json();
+      if (data.success && data.users) {
+        setTeamUsers(data.users);
+      }
+    } catch (err) {
+      console.error('Error fetching users in AdminPanel:', err);
+    }
+  };
 
   const fetchRegistrations = async () => {
     try {
@@ -122,40 +130,72 @@ export default function AdminPanel() {
     } catch (err) { console.error(err); }
   };
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    const entered = password.trim();
-    const targetUser = selectedUser || TEAM_MEMBERS.find(m => m.name.toLowerCase() === callerInput.toLowerCase().trim()) || { name: callerInput.trim() || 'Admin', role: 'Admin', pin: 'Action30' };
+    if (!loginUsername.trim() || !loginPassword.trim()) {
+      setLoginError('Please enter both username and password');
+      return;
+    }
 
-    // Matches user's specific PIN, or universal master password 'Action30'
-    const isMaster = entered.toLowerCase() === 'action30';
-    const isPinMatch = Boolean(targetUser.pin && entered === targetUser.pin);
+    try {
+      setIsLoggingIn(true);
+      setLoginError('');
+      const res = await fetch(`${API_URL}/api/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          username: loginUsername.trim(),
+          password: loginPassword.trim()
+        })
+      });
 
-    if (isMaster || isPinMatch) {
-      const chosenCaller = callerInput.trim() || targetUser.name || 'Admin';
-      const chosenRole = targetUser.role || 'Admin';
+      const data = await res.json();
+      if (data.success && data.user) {
+        // Persist session across browser refresh
+        localStorage.setItem('crm_is_authenticated', 'true');
+        localStorage.setItem('crm_active_caller', data.user.name);
+        localStorage.setItem('crm_caller_role', data.user.role);
+        localStorage.setItem('crm_username', data.user.username);
 
-      // Persist across browser refreshes & tabs
-      localStorage.setItem('crm_is_authenticated', 'true');
-      localStorage.setItem('crm_active_caller', chosenCaller);
-      localStorage.setItem('crm_caller_role', chosenRole);
+        setActiveCaller(data.user.name);
+        setActiveRole(data.user.role);
+        setCurrentUsername(data.user.username);
+        setIsAuthenticated(true);
+        setLoginPassword('');
+        setLoginError('');
+      } else {
+        setLoginError(data.error || 'Invalid username or password');
+      }
+    } catch (err) {
+      console.error('Login error:', err);
+      // Fallback in case of emergency: allow Action30 master password
+      if (loginPassword.trim() === 'Action30') {
+        const fallbackName = loginUsername.trim() || 'Admin';
+        localStorage.setItem('crm_is_authenticated', 'true');
+        localStorage.setItem('crm_active_caller', fallbackName);
+        localStorage.setItem('crm_caller_role', 'Admin');
+        localStorage.setItem('crm_username', fallbackName.toLowerCase());
 
-      setActiveCaller(chosenCaller);
-      setActiveRole(chosenRole);
-      setIsAuthenticated(true);
-      setError('');
-      setPassword('');
-    } else {
-      setError(`Incorrect PIN/password. Enter PIN (${targetUser.pin}) or Action30`);
+        setActiveCaller(fallbackName);
+        setActiveRole('Admin');
+        setCurrentUsername(fallbackName.toLowerCase());
+        setIsAuthenticated(true);
+        setLoginError('');
+      } else {
+        setLoginError('Server error. Check backend connection or password.');
+      }
+    } finally {
+      setIsLoggingIn(false);
     }
   };
 
   const handleLogout = () => {
     if (window.confirm('Are you sure you want to log out from CRM Portal?')) {
       localStorage.removeItem('crm_is_authenticated');
+      localStorage.removeItem('crm_username');
       setIsAuthenticated(false);
-      setPassword('');
-      setError('');
+      setLoginPassword('');
+      setLoginError('');
     }
   };
 
@@ -166,8 +206,6 @@ export default function AdminPanel() {
     setActiveCaller(chosen);
     setActiveRole(role);
     setCallerInput(chosen);
-    const userObj = TEAM_MEMBERS.find(m => m.name.toLowerCase() === chosen.toLowerCase());
-    if (userObj) setSelectedUser(userObj);
     setIsSwitchCallerOpen(false);
   };
 
@@ -177,111 +215,91 @@ export default function AdminPanel() {
         <div className="w-full max-w-md bg-[#101018] rounded-3xl p-6 sm:p-8 border border-white/10 shadow-2xl">
           <div className="text-center mb-6">
             <div className="w-14 h-14 rounded-2xl bg-blue-500/20 text-[#3B82F6] flex items-center justify-center mx-auto mb-3 shadow-[0_0_25px_rgba(59,130,246,0.3)]">
-              <Crown size={28} />
+              <Shield size={28} />
             </div>
             <h2 className="text-2xl font-black text-white uppercase tracking-tight">BanaviAeBrand CRM</h2>
-            <p className="text-white/60 mt-1 text-xs">Select your profile to start calling & follow-ups</p>
+            <p className="text-white/60 mt-1 text-xs">Enter your Username & Password to access dashboard</p>
           </div>
           
-          <form onSubmit={handleLogin} className="space-y-5">
-            {/* Quick User Profiles Grid */}
+          <form onSubmit={handleLogin} className="space-y-4">
+            {/* Username Input */}
             <div>
-              <div className="flex items-center justify-between mb-2">
-                <label className="text-xs font-bold text-white/70 uppercase tracking-wider flex items-center gap-1.5">
-                  <User size={13} className="text-[#3B82F6]" /> Who is working today?
-                </label>
-                <span className="text-[10px] text-emerald-400 font-bold flex items-center gap-1">
-                  <ShieldCheck size={12} /> Auto-Saved
-                </span>
+              <label className="block text-xs font-bold text-white/70 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+                <User size={13} className="text-[#3B82F6]" /> Username
+              </label>
+              <div className="relative">
+                <input
+                  type="text"
+                  required
+                  value={loginUsername}
+                  onChange={(e) => setLoginUsername(e.target.value)}
+                  placeholder="e.g. vivek, pooja, manthan"
+                  className="w-full px-4 py-3 bg-black border border-white/10 rounded-xl text-white text-sm font-mono focus:border-[#3B82F6] outline-none transition-all placeholder:text-white/30"
+                  autoFocus
+                />
               </div>
-
-              <div className="grid grid-cols-2 gap-2 mb-2.5">
-                {TEAM_MEMBERS.map((u) => {
-                  const isSelected = selectedUser?.id === u.id;
-                  return (
-                    <button
-                      key={u.id}
-                      type="button"
-                      onClick={() => {
-                        setSelectedUser(u);
-                        setCallerInput(u.name);
-                        setError('');
-                      }}
-                      className={`p-2.5 rounded-2xl text-left border transition-all cursor-pointer relative ${
-                        isSelected
-                          ? 'bg-blue-600/20 border-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.3)] scale-[1.02]'
-                          : 'bg-white/[0.03] border-white/10 hover:bg-white/[0.06] hover:border-white/20'
-                      }`}
-                    >
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="text-base">{u.avatar}</span>
-                        <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ${
-                          u.role === 'Admin' ? 'bg-amber-500/20 text-amber-300' : 'bg-pink-500/20 text-pink-300'
-                        }`}>
-                          {u.badge}
-                        </span>
-                      </div>
-                      <div className="font-extrabold text-xs text-white truncate">{u.name}</div>
-                      <div className="text-[10px] text-white/40 font-mono mt-0.5">PIN: {u.pin}</div>
-                      {isSelected && (
-                        <div className="absolute top-2 right-2 w-2 h-2 rounded-full bg-blue-400" />
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
-
-              {/* Custom Caller Name Input */}
-              <input
-                type="text"
-                value={callerInput}
-                onChange={(e) => {
-                  setCallerInput(e.target.value);
-                  const matched = TEAM_MEMBERS.find(m => m.name.toLowerCase() === e.target.value.toLowerCase().trim());
-                  if (matched) setSelectedUser(matched);
-                }}
-                placeholder="Or type custom caller name..."
-                required
-                className="w-full px-3.5 py-2 bg-black border border-white/10 rounded-xl text-white text-xs focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6] outline-none transition-all placeholder:text-white/30"
-              />
             </div>
 
-            {/* PIN / Password */}
+            {/* Password Input */}
             <div>
-              <div className="flex items-center justify-between mb-1.5">
-                <label className="text-xs font-bold text-white/70 uppercase tracking-wider flex items-center gap-1.5">
-                  <Key size={13} className="text-[#3B82F6]" /> Enter PIN or Master Password
-                </label>
-                {selectedUser && (
-                  <span className="text-[10px] text-blue-400/80 font-mono">
-                    PIN: <strong>{selectedUser.pin}</strong>
-                  </span>
-                )}
+              <label className="block text-xs font-bold text-white/70 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+                <Lock size={13} className="text-[#3B82F6]" /> Password
+              </label>
+              <div className="relative">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  required
+                  value={loginPassword}
+                  onChange={(e) => setLoginPassword(e.target.value)}
+                  placeholder="Enter your password"
+                  className="w-full px-4 py-3 pr-11 bg-black border border-white/10 rounded-xl text-white text-sm focus:border-[#3B82F6] outline-none transition-all placeholder:text-white/30"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-3 text-white/40 hover:text-white transition-colors"
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
               </div>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder={`Enter PIN (${selectedUser?.pin || '1111'}) or Action30`}
-                className="w-full px-4 py-3 bg-black border border-white/10 rounded-xl text-white focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6] outline-none transition-all text-sm font-mono tracking-widest"
-                autoFocus
-              />
-              {error && <p className="text-red-400 text-xs mt-2 font-bold flex items-center gap-1">⚠️ {error}</p>}
             </div>
+
+            {/* Error Message */}
+            {loginError && (
+              <div className="p-3 bg-red-500/10 border border-red-500/30 text-red-400 rounded-xl text-xs font-bold flex items-center gap-2">
+                <span>⚠️ {loginError}</span>
+              </div>
+            )}
 
             {/* Persistence Guarantee Notice */}
             <div className="flex items-center gap-2 p-2.5 bg-white/[0.03] border border-white/5 rounded-xl text-[11px] text-white/60">
               <ShieldCheck size={16} className="text-emerald-400 shrink-0" />
-              <span>Refresh કરવાથી લૉગઆઉટ નહીં થાય. તમારું લૉગિન સેવ રહેશે.</span>
+              <span>Refresh કરવાથી લૉગઆઉટ નહીં થાય. બ્રાઉઝરમાં લૉગિન સેવ રહેશે.</span>
             </div>
 
+            {/* Submit Button */}
             <button 
               type="submit"
-              className="w-full py-3.5 bg-[#3B82F6] text-black font-black uppercase tracking-wider rounded-xl hover:bg-[#2563EB] hover:text-white transition-all shadow-[0_0_20px_rgba(59,130,246,0.3)] cursor-pointer text-xs sm:text-sm flex items-center justify-center gap-2"
+              disabled={isLoggingIn}
+              className="w-full py-3.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-black uppercase tracking-wider rounded-xl hover:from-blue-500 hover:to-indigo-500 transition-all shadow-[0_0_20px_rgba(59,130,246,0.3)] cursor-pointer text-xs sm:text-sm flex items-center justify-center gap-2 disabled:opacity-50"
             >
-              <span>Unlock as {callerInput || selectedUser?.name || 'User'}</span>
+              {isLoggingIn ? (
+                <>
+                  <RefreshCw size={16} className="animate-spin" />
+                  <span>Logging In...</span>
+                </>
+              ) : (
+                <span>Login to CRM Dashboard</span>
+              )}
             </button>
           </form>
+
+          {/* Quick Helper */}
+          <div className="mt-5 pt-4 border-t border-white/10 text-center">
+            <span className="text-[11px] text-white/40 block">
+              💡 Users & Roles (Admin / Caller) can be created inside Admin Panel.
+            </span>
+          </div>
         </div>
       </div>
     );
@@ -340,9 +358,8 @@ export default function AdminPanel() {
               </button>
             </div>
           </div>
-
           
-          {/* Main 5 Switcher Buttons */}
+          {/* Main 6 Switcher Buttons */}
           <div className="flex flex-wrap items-center bg-[#101018] p-1.5 rounded-2xl border border-white/10 gap-1.5 shadow-xl w-full xl:w-auto">
             {/* 1. ORIGINAL LEADS BUTTON */}
             <button 
@@ -398,7 +415,7 @@ export default function AdminPanel() {
               </span>
             </button>
 
-            {/* 4. ADMIN CALLS BUTTON (Next to Confirmed Leads!) */}
+            {/* 4. ADMIN CALLS BUTTON */}
             <button 
               onClick={() => setActiveTab('admincall')}
               className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 sm:px-5 py-2.5 rounded-xl font-black text-xs sm:text-sm transition-all cursor-pointer ${
@@ -433,6 +450,26 @@ export default function AdminPanel() {
                 {workshops.length}
               </span>
             </button>
+
+            {/* 6. MANAGE USERS BUTTON */}
+            <button 
+              onClick={() => setActiveTab('users')}
+              className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 sm:px-5 py-2.5 rounded-xl font-black text-xs sm:text-sm transition-all cursor-pointer ${
+                activeTab === 'users' 
+                  ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-[0_0_20px_rgba(59,130,246,0.5)]' 
+                  : 'text-white/60 hover:text-white hover:bg-white/5'
+              }`}
+            >
+              <Shield size={16} /> 
+              <span>Users</span>
+              {teamUsers.length > 0 && (
+                <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${
+                  activeTab === 'users' ? 'bg-white/20 text-white' : 'bg-white/10 text-white/70'
+                }`}>
+                  {teamUsers.length}
+                </span>
+              )}
+            </button>
           </div>
         </div>
 
@@ -448,7 +485,13 @@ export default function AdminPanel() {
               </div>
               <p className="text-xs text-white/60">Choose whose profile is calling and logging follow-ups:</p>
               <div className="grid grid-cols-2 gap-2">
-                {TEAM_MEMBERS.map((u) => (
+                {(teamUsers.length > 0 ? teamUsers : [
+                  { id: '1', name: 'Vivek', role: 'Admin' },
+                  { id: '2', name: 'Manthan', role: 'Admin' },
+                  { id: '3', name: 'Jaydeep', role: 'Admin' },
+                  { id: '4', name: 'Kuldeep', role: 'Admin' },
+                  { id: '5', name: 'Pooja Ma\'am', role: 'Caller' }
+                ]).map((u) => (
                   <button
                     key={u.id}
                     type="button"
@@ -459,7 +502,7 @@ export default function AdminPanel() {
                         : 'bg-white/5 text-white/80 hover:bg-white/10 hover:text-white border border-white/10'
                     }`}
                   >
-                    <span>{u.avatar} {u.name}</span>
+                    <span>{u.role === 'Admin' ? '👑' : '📞'} {u.name}</span>
                   </button>
                 ))}
               </div>
@@ -492,7 +535,15 @@ export default function AdminPanel() {
           />
         )}
 
-        {/* Workshops Management Tab */}
+        {/* ── User Management Tab ── */}
+        {activeTab === 'users' && (
+          <UserManagement
+            currentUser={{ username: currentUsername, name: activeCaller, role: activeRole }}
+            onUserListChange={setTeamUsers}
+          />
+        )}
+
+        {/* ── Workshops Management Tab ── */}
         {activeTab === 'workshops' && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-1">
@@ -526,18 +577,21 @@ export default function AdminPanel() {
                     </div>
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-white/50 uppercase tracking-wider mb-1.5">Max Slots Capacity</label>
+                    <label className="block text-xs font-bold text-white/50 uppercase tracking-wider mb-1.5">Max Slots</label>
                     <div className="relative">
                       <Hash className="absolute left-3 top-3 w-4 h-4 text-white/40" />
                       <input 
-                        type="number" required min="1" max="500"
-                        value={newWorkshop.maxSlots} onChange={e => setNewWorkshop({...newWorkshop, maxSlots: e.target.value})}
+                        type="number" required min="1"
+                        value={newWorkshop.maxSlots} onChange={e => setNewWorkshop({...newWorkshop, maxSlots: parseInt(e.target.value) || 0})}
                         className="w-full pl-9 pr-3 py-2.5 bg-black border border-white/10 rounded-xl text-white text-sm focus:border-[#3B82F6] outline-none transition-all"
                       />
                     </div>
                   </div>
-                  <button type="submit" className="w-full py-3 mt-2 bg-[#3B82F6] text-black font-black rounded-xl hover:bg-[#2563EB] transition-colors flex items-center justify-center gap-2 uppercase tracking-wide text-sm shadow-[0_0_20px_rgba(59,130,246,0.3)] cursor-pointer">
-                    <Plus size={16} /> Add Workshop
+                  <button 
+                    type="submit"
+                    className="w-full py-3 bg-[#3B82F6] text-black font-black uppercase tracking-wider rounded-xl hover:bg-[#2563EB] hover:text-white transition-colors cursor-pointer text-xs flex items-center justify-center gap-2"
+                  >
+                    <Plus size={16} /> Create Workshop Date
                   </button>
                 </form>
               </div>
