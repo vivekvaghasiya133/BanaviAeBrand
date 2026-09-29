@@ -62,7 +62,9 @@ export default function AboutTeam() {
         "Execution requires structure. Kuldeep manages the coordination, planning and on-ground execution that keeps the entire experience running smoothly from start to finish.",
       ],
       quote: "Seamless execution is the backbone of a great experience.",
-      instagram: '#'
+      instagram: '#',
+      image: '/kuldeep.jpg',
+      imageClass: 'scale-[1.1] object-[50%_15%]'
     }
   ];
 
