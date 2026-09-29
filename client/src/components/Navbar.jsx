@@ -79,7 +79,7 @@ export default function Navbar({ onOpenOnboarding }) {
           </span>
           <span className="text-white/20 hidden sm:inline">|</span>
           <span className="bg-red-500/20 border border-red-500/30 text-red-400 px-2 py-0.5 rounded-full text-[11px] sm:text-xs font-black uppercase tracking-wider animate-pulse">
-            🔥 Only 5 Seats Available
+            🔥 Only 1 Seat Available
           </span>
           <span className="text-[#3B82F6] font-bold inline-flex items-center gap-1 group-hover:text-white transition-colors ml-1">
             Register Now <ArrowRight size={12} className="group-hover:translate-x-1 transition-transform" />
@@ -300,7 +300,7 @@ export default function Navbar({ onOpenOnboarding }) {
             }}
             className="w-full py-3.5 rounded-xl bg-[#3B82F6] text-black font-extrabold text-center mt-4 shadow-[0_0_20px_rgba(59,130,246,0.4)] flex items-center justify-center gap-2"
           >
-            <span>Book Slot (4th Oct — 5 Seats Left)</span>
+            <span>Book Slot (4th Oct — 1 Seat Left)</span>
             <span className="w-2 h-2 rounded-full bg-red-600 animate-ping" />
           </button>
         </div>

@@ -22,7 +22,7 @@ export default function FinalCTA() {
           <div className="text-6xl md:text-8xl font-black tracking-tighter mb-2">₹10,000</div>
           <div className="text-lg font-bold uppercase tracking-widest bg-black text-[#3B82F6] inline-flex items-center gap-2 px-4 py-1.5 rounded-sm border border-[#3B82F6]/40 shadow-[0_0_15px_rgba(59,130,246,0.3)]">
             <span className="w-2 h-2 rounded-full bg-red-500 animate-ping"></span>
-            FOUNDING BATCH — ONLY 5 SEATS AVAILABLE
+            FOUNDING BATCH — ONLY 1 SEAT AVAILABLE
           </div>
         </div>
 
@@ -42,7 +42,7 @@ export default function FinalCTA() {
           }}
           className="px-12 py-6 bg-black text-[#3B82F6] text-xl md:text-2xl font-black rounded-2xl hover:bg-neutral-900 transition-colors uppercase tracking-widest shadow-[0_20px_50px_rgba(0,0,0,0.3)] hover:scale-105 duration-300 cursor-pointer"
         >
-          BOOK YOUR SLOT — 5 SEATS AVAILABLE
+          BOOK YOUR SLOT — 1 SEAT AVAILABLE
         </button>
         
         <p className="mt-6 text-black/70 font-bold uppercase tracking-widest text-sm">

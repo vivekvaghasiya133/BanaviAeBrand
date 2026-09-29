@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Users, Search, Download, Trash2, Calendar, MapPin, Hash, Plus, PhoneCall, Award, CheckCircle2, Crown, User, RefreshCw, LogOut, Key, ShieldCheck, Check, Shield, Lock, Eye, EyeOff } from 'lucide-react';
+import { Users, Search, Download, Trash2, Calendar, MapPin, Hash, Plus, PhoneCall, Award, CheckCircle2, Crown, User, RefreshCw, LogOut, Key, ShieldCheck, Check, Shield, Lock, Eye, EyeOff, UserX } from 'lucide-react';
 import { API_URL } from '../config';
 import FollowupDashboard from './FollowupDashboard';
 import UserManagement from './UserManagement';
 
 export default function AdminPanel() {
-  const [activeTab, setActiveTab] = useState('original'); // 'original' | 'coldcall' | 'confirmed' | 'admincall' | 'workshops' | 'users'
+  const [activeTab, setActiveTab] = useState('original'); // 'original' | 'coldcall' | 'confirmed' | 'admincall' | 'notinterested' | 'workshops' | 'users'
 
   // Persistent Login & User Profile Session
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
@@ -34,7 +34,7 @@ export default function AdminPanel() {
   // Registrations state
   const [registrations, setRegistrations] = useState([]);
   const [loadingRegs, setLoadingRegs] = useState(true);
-  const [leadCounts, setLeadCounts] = useState({ original: 0, coldcall: 0, confirmed: 0, admincall: 0, total: 0 });
+  const [leadCounts, setLeadCounts] = useState({ original: 0, coldcall: 0, confirmed: 0, admincall: 0, notinterested: 0, total: 0 });
 
   // Workshops state
   const [workshops, setWorkshops] = useState([]);
@@ -430,6 +430,24 @@ export default function AdminPanel() {
                 activeTab === 'admincall' ? 'bg-black/25 text-black' : 'bg-amber-500/20 text-amber-300'
               }`}>
                 {leadCounts.admincall || 0}
+              </span>
+            </button>
+
+            {/* 4.5 NOT INTERESTED BUTTON */}
+            <button 
+              onClick={() => setActiveTab('notinterested')}
+              className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 sm:px-5 py-2.5 rounded-xl font-black text-xs sm:text-sm transition-all cursor-pointer ${
+                activeTab === 'notinterested' 
+                  ? 'bg-gradient-to-r from-rose-500 to-red-600 text-white shadow-[0_0_20px_rgba(244,63,94,0.5)]' 
+                  : 'text-rose-400/80 hover:text-rose-300 hover:bg-rose-500/10 border border-rose-500/20'
+              }`}
+            >
+              <UserX size={16} className={activeTab === 'notinterested' ? 'text-white' : 'text-rose-400'} /> 
+              <span>Not Interested</span>
+              <span className={`px-2 py-0.5 rounded-full text-xs font-black ${
+                activeTab === 'notinterested' ? 'bg-white/20 text-white' : 'bg-rose-500/20 text-rose-300'
+              }`}>
+                {leadCounts.notinterested || 0}
               </span>
             </button>
 

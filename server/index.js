@@ -447,10 +447,10 @@ app.get('/api/admin/registrations', async (req, res) => {
 
     if (leadType === 'original') {
       query.$or = [{ leadType: 'original' }, { leadType: { $exists: false } }, { leadType: null }];
-      query.latestOutcome = { $ne: 'Admin Call' };
+      query.latestOutcome = { $nin: ['Admin Call', 'Not Interested'] };
     } else if (leadType === 'coldcall') {
       query.leadType = 'coldcall';
-      query.latestOutcome = { $ne: 'Admin Call' };
+      query.latestOutcome = { $nin: ['Admin Call', 'Not Interested'] };
     } else if (leadType === 'confirmed') {
       query.leadType = 'confirmed';
     } else if (leadType === 'admincall') {
@@ -458,6 +458,8 @@ app.get('/api/admin/registrations', async (req, res) => {
       if (assignedAdmin && assignedAdmin !== 'All') {
         query.assignedAdmin = assignedAdmin;
       }
+    } else if (leadType === 'notinterested') {
+      query.latestOutcome = 'Not Interested';
     }
 
     if (tag && tag !== 'All') {
@@ -500,14 +502,15 @@ app.get('/api/admin/registrations', async (req, res) => {
 // Admin: Get Lead Counts and Distinct Tags
 app.get('/api/admin/lead-counts', async (req, res) => {
   try {
-    const [original, coldcall, confirmed, admincall, total] = await Promise.all([
+    const [original, coldcall, confirmed, admincall, notinterested, total] = await Promise.all([
       Registration.countDocuments({
         $or: [{ leadType: 'original' }, { leadType: { $exists: false } }, { leadType: null }],
-        latestOutcome: { $ne: 'Admin Call' }
+        latestOutcome: { $nin: ['Admin Call', 'Not Interested'] }
       }),
-      Registration.countDocuments({ leadType: 'coldcall', latestOutcome: { $ne: 'Admin Call' } }),
+      Registration.countDocuments({ leadType: 'coldcall', latestOutcome: { $nin: ['Admin Call', 'Not Interested'] } }),
       Registration.countDocuments({ leadType: 'confirmed' }),
       Registration.countDocuments({ latestOutcome: 'Admin Call' }),
+      Registration.countDocuments({ latestOutcome: 'Not Interested' }),
       Registration.countDocuments({})
     ]);
 
@@ -522,13 +525,54 @@ app.get('/api/admin/lead-counts', async (req, res) => {
 
     res.json({
       success: true,
-      counts: { original, coldcall, confirmed, admincall, total },
+      counts: { original, coldcall, confirmed, admincall, notinterested, total },
       adminBreakdown,
       tags: distinctTags.filter(Boolean)
     });
   } catch (error) {
     console.error('Error fetching lead counts:', error);
     res.status(500).json({ success: false, error: 'Server error' });
+  }
+});
+
+// Admin: Get recent follow-up activity feed across all staff (latest at the top)
+app.get('/api/admin/recent-activities', async (req, res) => {
+  try {
+    const limit = parseInt(req.query.limit) || 40;
+    const activities = await Registration.aggregate([
+      { $match: { 'followUpHistory.0': { $exists: true } } },
+      { $unwind: '$followUpHistory' },
+      {
+        $project: {
+          leadId: '$_id',
+          leadName: '$name',
+          leadPhone: '$phone',
+          leadType: '$leadType',
+          tag: '$tag',
+          city: '$city',
+          assignedAdmin: '$followUpHistory.assignedAdmin',
+          callerName: '$followUpHistory.callerName',
+          outcome: '$followUpHistory.outcome',
+          note: '$followUpHistory.note',
+          nextFollowUpDate: '$followUpHistory.nextFollowUpDate',
+          createdAt: '$followUpHistory.createdAt'
+        }
+      },
+      { $sort: { createdAt: -1 } },
+      { $limit: limit }
+    ]);
+
+    res.json({
+      success: true,
+      activities: activities.map(a => ({
+        ...a,
+        id: `${a.leadId}-${new Date(a.createdAt).getTime()}`,
+        leadId: a.leadId.toString()
+      }))
+    });
+  } catch (error) {
+    console.error('Error fetching recent activities:', error);
+    res.status(500).json({ success: false, error: 'Server error fetching activities' });
   }
 });
 

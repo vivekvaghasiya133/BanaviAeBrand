@@ -112,7 +112,7 @@ export default function LaunchSequence() {
             <span className="text-white/20 hidden sm:inline">|</span>
 
             <span className="px-3 py-1 rounded-full bg-red-500/20 border border-red-500/40 text-red-400 text-xs font-black tracking-wider uppercase animate-pulse">
-              🔥 Only 5 Seats Available
+              🔥 Only 1 Seat Available
             </span>
 
             <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-[#3B82F6] text-black font-black text-xs uppercase tracking-wider group-hover:bg-white group-hover:scale-105 transition-all duration-200 shadow-md">

@@ -4,7 +4,7 @@ import {
   CheckCircle, XCircle, Plus, ChevronDown, ChevronUp, X, RefreshCw, 
   Share2, Users, UserPlus, AlertCircle, Upload, Award, ArrowRightLeft, 
   Tag, ChevronLeft, ChevronRight, CheckCircle2, PhoneCall, Sparkles, Filter,
-  Crown, User
+  Crown, User, Activity, UserX
 } from 'lucide-react';
 import { API_URL } from '../config';
 import BulkImportModal from './BulkImportModal';
@@ -402,11 +402,12 @@ export default function FollowupDashboard({
 
   // Overall counts for category tabs
   const categoryCounts = useMemo(() => {
-    const original = enrichedRegistrations.filter(r => r.leadType === 'original' && r.latestOutcome !== 'Admin Call').length;
-    const coldcall = enrichedRegistrations.filter(r => r.leadType === 'coldcall' && r.latestOutcome !== 'Admin Call').length;
+    const original = enrichedRegistrations.filter(r => r.leadType === 'original' && r.latestOutcome !== 'Admin Call' && r.latestOutcome !== 'Not Interested').length;
+    const coldcall = enrichedRegistrations.filter(r => r.leadType === 'coldcall' && r.latestOutcome !== 'Admin Call' && r.latestOutcome !== 'Not Interested').length;
     const confirmed = enrichedRegistrations.filter(r => r.leadType === 'confirmed').length;
     const admincall = enrichedRegistrations.filter(r => r.latestOutcome === 'Admin Call').length;
-    return { original, coldcall, confirmed, admincall, total: enrichedRegistrations.length };
+    const notinterested = enrichedRegistrations.filter(r => r.latestOutcome === 'Not Interested').length;
+    return { original, coldcall, confirmed, admincall, notinterested, total: enrichedRegistrations.length };
   }, [enrichedRegistrations]);
 
   // Unique tags for coldcall leads
@@ -449,10 +450,12 @@ export default function FollowupDashboard({
       if (activeCategory === 'admincall') {
         if (r.latestOutcome !== 'Admin Call') return false;
         if (selectedAdminFilter !== 'All' && r.assignedAdmin !== selectedAdminFilter) return false;
+      } else if (activeCategory === 'notinterested') {
+        if (r.latestOutcome !== 'Not Interested') return false;
       } else if (activeCategory === 'original') {
-        if (r.leadType !== 'original' || r.latestOutcome === 'Admin Call') return false;
+        if (r.leadType !== 'original' || r.latestOutcome === 'Admin Call' || r.latestOutcome === 'Not Interested') return false;
       } else if (activeCategory === 'coldcall') {
-        if (r.leadType !== 'coldcall' || r.latestOutcome === 'Admin Call') return false;
+        if (r.leadType !== 'coldcall' || r.latestOutcome === 'Admin Call' || r.latestOutcome === 'Not Interested') return false;
       } else if (activeCategory === 'confirmed') {
         if (r.leadType !== 'confirmed') return false;
       }
@@ -493,10 +496,12 @@ export default function FollowupDashboard({
     let list = [];
     if (activeCategory === 'admincall') {
       list = enrichedRegistrations.filter(r => r.latestOutcome === 'Admin Call');
+    } else if (activeCategory === 'notinterested') {
+      list = enrichedRegistrations.filter(r => r.latestOutcome === 'Not Interested');
     } else if (activeCategory === 'original') {
-      list = enrichedRegistrations.filter(r => r.leadType === 'original' && r.latestOutcome !== 'Admin Call');
+      list = enrichedRegistrations.filter(r => r.leadType === 'original' && r.latestOutcome !== 'Admin Call' && r.latestOutcome !== 'Not Interested');
     } else if (activeCategory === 'coldcall') {
-      list = enrichedRegistrations.filter(r => r.leadType === 'coldcall' && r.latestOutcome !== 'Admin Call');
+      list = enrichedRegistrations.filter(r => r.leadType === 'coldcall' && r.latestOutcome !== 'Admin Call' && r.latestOutcome !== 'Not Interested');
     } else {
       list = enrichedRegistrations.filter(r => r.leadType === 'confirmed');
     }
@@ -511,6 +516,101 @@ export default function FollowupDashboard({
       done: list.filter(r => r.latestOutcome === 'Client Done').length
     };
   }, [enrichedRegistrations, activeCategory]);
+
+  // Recent staff activities stream across all leads (sorted latest on top)
+  const [activityLimit, setActivityLimit] = useState(10);
+  const recentActivities = useMemo(() => {
+    const list = [];
+    registrations.forEach(reg => {
+      if (Array.isArray(reg.followUpHistory)) {
+        reg.followUpHistory.forEach(f => {
+          list.push({
+            id: f._id || `${reg.id || reg._id}-${f.createdAt || Date.now()}`,
+            leadId: reg.id || reg._id,
+            lead: reg,
+            leadName: reg.name,
+            leadPhone: reg.phone,
+            leadType: reg.leadType || 'original',
+            tag: reg.tag,
+            city: reg.city,
+            callerName: f.callerName || reg.latestCallerName || 'Staff',
+            outcome: f.outcome || 'Pending',
+            assignedAdmin: f.assignedAdmin || '',
+            note: f.note || '',
+            nextFollowUpDate: f.nextFollowUpDate || '',
+            createdAt: new Date(f.createdAt || reg.createdAt)
+          });
+        });
+      }
+    });
+    // Sort latest at the very top (descending by timestamp)
+    return list.sort((a, b) => b.createdAt - a.createdAt);
+  }, [registrations]);
+
+  const formatTimeAgo = (date) => {
+    if (!date || isNaN(date.getTime())) return '';
+    const now = new Date();
+    const diffMs = now - date;
+    const diffSec = Math.floor(diffMs / 1000);
+    const diffMin = Math.floor(diffSec / 60);
+    const diffHours = Math.floor(diffMin / 60);
+    const diffDays = Math.floor(diffHours / 24);
+
+    if (diffSec < 60) return 'Just now';
+    if (diffMin < 60) return `${diffMin}m ago`;
+    if (diffHours < 24) return `${diffHours}h ago`;
+    if (diffDays === 1) return `Yesterday at ${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+    return `${date.toLocaleDateString([], { day: 'numeric', month: 'short' })} at ${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+  };
+
+  const getOutcomeBadge = (outcome, assignedAdmin) => {
+    if (outcome === 'Admin Call') {
+      return (
+        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-black bg-amber-100 text-amber-900 border border-amber-300">
+          <Crown size={12} className="text-amber-600" />
+          Admin Call {assignedAdmin ? `(${assignedAdmin})` : ''}
+        </span>
+      );
+    }
+    if (outcome === 'Not Interested') {
+      return (
+        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-rose-100 text-rose-800 border border-rose-200">
+          <XCircle size={12} className="text-rose-600" />
+          Not Interested
+        </span>
+      );
+    }
+    if (outcome === 'Client Done') {
+      return (
+        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
+          <CheckCircle size={12} className="text-emerald-600" />
+          Client Done
+        </span>
+      );
+    }
+    if (outcome === 'Pending Lead') {
+      return (
+        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-purple-100 text-purple-800 border border-purple-200">
+          <Clock size={12} className="text-purple-600" />
+          Pending Lead
+        </span>
+      );
+    }
+    if (outcome === 'No Answer / Busy') {
+      return (
+        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-orange-100 text-orange-800 border border-orange-200">
+          <Phone size={12} className="text-orange-600" />
+          No Answer / Busy
+        </span>
+      );
+    }
+    return (
+      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-100 text-blue-800 border border-blue-200">
+        <PhoneCall size={12} className="text-blue-600" />
+        {outcome || 'Call Again'}
+      </span>
+    );
+  };
 
   // Pagination calculations
   const totalPages = Math.max(1, Math.ceil(filteredLeads.length / pageSize));
@@ -627,6 +727,23 @@ export default function FollowupDashboard({
               {categoryCounts.admincall}
             </span>
           </button>
+          {/* 5. Not Interested Leads Tab */}
+          <button
+            onClick={() => handleCategorySwitch('notinterested')}
+            className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 rounded-lg font-black text-xs sm:text-sm transition-all cursor-pointer ${
+              activeCategory === 'notinterested'
+                ? 'bg-rose-600 text-white shadow-md'
+                : 'text-rose-800 hover:text-rose-950 hover:bg-rose-50 border border-rose-200'
+            }`}
+          >
+            <UserX size={16} />
+            <span>Not Interested</span>
+            <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${
+              activeCategory === 'notinterested' ? 'bg-white/20 text-white' : 'bg-rose-100 text-rose-800'
+            }`}>
+              {categoryCounts.notinterested || 0}
+            </span>
+          </button>
         </div>
 
         {/* Category Header Label */}
@@ -635,6 +752,7 @@ export default function FollowupDashboard({
           {activeCategory === 'coldcall' && '📞 Outbound Calling Database & Bulk Leads'}
           {activeCategory === 'confirmed' && '🏆 Finalized Students & Course Enrollments'}
           {activeCategory === 'admincall' && '👑 Priority Calls Assigned to Admins (Vivek, Manthan, Jaydeep, Kuldeep)'}
+          {activeCategory === 'notinterested' && '🚫 Leads Closed As Not Interested (Archived from active lists)'}
         </div>
       </div>
 
@@ -643,7 +761,7 @@ export default function FollowupDashboard({
         <div className="bg-white rounded-xl p-4 border border-blue-200 shadow-sm flex flex-col justify-center">
           <div className="text-2xl sm:text-3xl font-black text-slate-800">{categoryStats.total.toLocaleString()}</div>
           <div className="text-[11px] font-bold text-slate-500 uppercase tracking-wider mt-1">
-            {activeCategory === 'coldcall' ? 'Total Cold Leads' : activeCategory === 'confirmed' ? 'Confirmed Students' : activeCategory === 'admincall' ? 'Admin Calls Queue' : 'Total Original'}
+            {activeCategory === 'coldcall' ? 'Total Cold Leads' : activeCategory === 'confirmed' ? 'Confirmed Students' : activeCategory === 'admincall' ? 'Admin Calls Queue' : activeCategory === 'notinterested' ? 'Total Not Interested' : 'Total Original'}
           </div>
         </div>
         <div className="bg-green-50 rounded-xl p-4 border border-green-300 shadow-sm flex flex-col justify-center">
@@ -1156,6 +1274,126 @@ export default function FollowupDashboard({
           </div>
         </div>
       )}
+
+      {/* ── Recent Staff Activity / Live Follow-up Stream (Latest on top) ── */}
+      <div className="bg-white rounded-3xl border border-gray-200 p-5 sm:p-6 shadow-sm space-y-4">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-4 border-b border-gray-100">
+          <div>
+            <h3 className="text-base sm:text-lg font-black text-gray-900 uppercase tracking-tight flex items-center gap-2">
+              <Activity className="text-blue-600 animate-pulse" size={20} />
+              <span>Recent Staff Activity & Follow-up Stream</span>
+            </h3>
+            <p className="text-xs text-gray-500 mt-0.5">
+              Live updates logged by calling staff & team members (latest on top)
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2 text-xs">
+            <span className="font-bold text-gray-500">
+              Total Logged Calls: <strong className="text-blue-600 font-black">{recentActivities.length}</strong>
+            </span>
+          </div>
+        </div>
+
+        {recentActivities.length === 0 ? (
+          <div className="text-center py-8 text-gray-400 text-xs">
+            No follow-up activity logged yet. When callers submit updates, they will appear here live.
+          </div>
+        ) : (
+          <div className="space-y-2.5">
+            {recentActivities.slice(0, activityLimit).map((act, index) => (
+              <div 
+                key={act.id || index}
+                className="p-3.5 rounded-2xl bg-gray-50/70 hover:bg-blue-50/40 border border-gray-200/80 transition-all flex flex-col md:flex-row justify-between items-start md:items-center gap-3"
+              >
+                {/* Left: Caller info + Outcome badge + Lead info */}
+                <div className="flex flex-wrap items-center gap-2.5 sm:gap-3">
+                  {/* Caller Identity */}
+                  <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-white border border-gray-200 text-xs font-black text-gray-800 shadow-xs">
+                    <User size={13} className="text-blue-600" />
+                    <span>{act.callerName}</span>
+                  </div>
+
+                  {/* Outcome Badge */}
+                  {getOutcomeBadge(act.outcome, act.assignedAdmin)}
+
+                  {/* Lead Name & Phone */}
+                  <div className="flex items-center gap-2 text-xs font-bold text-gray-900">
+                    <span className="text-gray-400">for</span>
+                    <button
+                      onClick={() => handleOpenFollowup(act.lead)}
+                      className="font-extrabold text-blue-700 hover:underline cursor-pointer"
+                    >
+                      {act.leadName}
+                    </button>
+                    <a href={`tel:${act.leadPhone}`} className="text-gray-600 hover:text-emerald-700 font-mono text-[11px]">
+                      {act.leadPhone}
+                    </a>
+                    <a
+                      href={`https://wa.me/${act.leadPhone && act.leadPhone.replace(/\D/g, '').length === 10 ? '91' + act.leadPhone.replace(/\D/g, '') : act.leadPhone}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-emerald-600 hover:text-emerald-700"
+                      title="WhatsApp Chat"
+                    >
+                      <MessageCircle size={13} />
+                    </a>
+                  </div>
+
+                  {/* Tag / Category */}
+                  {act.tag && (
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-purple-50 text-purple-700 border border-purple-200">
+                      🏷️ {act.tag}
+                    </span>
+                  )}
+                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md ${
+                    act.leadType === 'coldcall' ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800'
+                  }`}>
+                    {act.leadType === 'coldcall' ? 'Cold Call' : 'Original Lead'}
+                  </span>
+                </div>
+
+                {/* Right: Note + Next date + Timestamp + View Button */}
+                <div className="flex flex-wrap items-center gap-3 w-full md:w-auto justify-between md:justify-end text-xs">
+                  {act.note && (
+                    <div className="text-xs text-gray-700 italic bg-white px-2.5 py-1 rounded-lg border border-gray-200 max-w-xs truncate" title={act.note}>
+                      "{act.note}"
+                    </div>
+                  )}
+
+                  {act.nextFollowUpDate && (
+                    <div className="text-[11px] font-bold text-blue-700 flex items-center gap-1 bg-blue-50 px-2 py-1 rounded-lg">
+                      <Calendar size={11} /> Next: {act.nextFollowUpDate}
+                    </div>
+                  )}
+
+                  <div className="text-[11px] font-bold text-gray-400 flex items-center gap-1">
+                    <Clock size={11} /> {formatTimeAgo(act.createdAt)}
+                  </div>
+
+                  <button
+                    onClick={() => handleOpenFollowup(act.lead)}
+                    className="px-2.5 py-1 rounded-lg bg-white hover:bg-gray-100 text-gray-700 text-xs font-bold border border-gray-200 cursor-pointer transition-colors"
+                  >
+                    View
+                  </button>
+                </div>
+              </div>
+            ))}
+
+            {recentActivities.length > activityLimit && (
+              <div className="pt-2 text-center">
+                <button
+                  onClick={() => setActivityLimit(prev => prev + 20)}
+                  className="px-4 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold text-xs cursor-pointer transition-colors"
+                >
+                  Show More Activities ({recentActivities.length - activityLimit} remaining)
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
 
       {/* ── Modal 1: Add Manual Lead Modal ── */}
       {isAddLeadModalOpen && (

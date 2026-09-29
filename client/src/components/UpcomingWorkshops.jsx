@@ -45,7 +45,7 @@ export default function UpcomingWorkshops() {
           <div className="inline-flex items-center gap-2 px-3.5 py-1 bg-[#3B82F6]/10 border border-[#3B82F6]/20 text-[#3B82F6] text-xs font-bold uppercase tracking-widest rounded-full mb-4">
             <span>FOUNDING BATCH</span>
             <span className="text-white/30">·</span>
-            <span className="text-red-400 font-black animate-pulse">🔥 ONLY 5 SEATS AVAILABLE</span>
+            <span className="text-red-400 font-black animate-pulse">🔥 ONLY 1 SEAT AVAILABLE</span>
           </div>
           <h2 className="text-4xl md:text-5xl font-black uppercase tracking-tight">
             Upcoming <span className="text-[#3B82F6]">Workshops</span>
@@ -87,7 +87,7 @@ export default function UpcomingWorkshops() {
                         <span className="flex items-center gap-1.5"><MapPin size={16} className="text-[#3B82F6]" /> {ws.location}</span>
                         <span className="flex items-center gap-1.5 font-bold text-red-400 bg-red-500/10 px-2.5 py-1 rounded-full border border-red-500/20 text-xs">
                           <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-ping" />
-                          Only 5 Seats Available
+                          Only 1 Seat Available
                         </span>
                       </div>
                     </div>

@@ -308,10 +308,10 @@ export default function HeroSolarSystem({ onOpenOnboarding }) {
           <div className="flex flex-wrap items-center justify-start gap-3 mb-6 lg:mb-10">
             <span className="w-10 h-px bg-[#3B82F6]" />
             <span className="text-[#3B82F6] text-xs font-bold tracking-[0.4em] uppercase">
-              બનાવીએ બ્રાન્ડ · ONLY 5 SEATS AVAILABLE
+              બનાવીએ બ્રાન્ડ · ONLY 1 SEAT AVAILABLE
             </span>
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-500/10 border border-red-500/30 text-red-400 text-[11px] font-black uppercase tracking-wider animate-pulse shadow-[0_0_12px_rgba(239,68,68,0.3)]">
-              🔥 Only 5 Seats Left
+              🔥 Only 1 Seat Left
             </span>
           </div>
 
@@ -411,7 +411,7 @@ export default function HeroSolarSystem({ onOpenOnboarding }) {
                 data-cursor-label="Book 4th Oct"
                 className="group flex items-center gap-3 px-8 py-4 bg-[#3B82F6] text-white font-black rounded-full hover:bg-white hover:text-black transition-all duration-300 hover:scale-105 shadow-[0_0_40px_rgba(59,130,246,0.3)] text-sm uppercase tracking-wider cursor-pointer"
               >
-                <span>Book Slot (4th Oct · 5 Seats Left)</span>
+                <span>Book Slot (4th Oct · 1 Seat Left)</span>
                 <svg
                   width="14"
                   height="14"

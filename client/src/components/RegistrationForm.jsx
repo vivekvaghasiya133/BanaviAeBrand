@@ -132,7 +132,7 @@ export default function RegistrationForm() {
         <h2 className="text-3xl font-black text-white mb-2 uppercase tracking-tight">APPLY FOR BANAVIAEBRAND</h2>
         <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-red-500/10 border border-red-500/30 rounded-full text-red-400 text-xs font-black uppercase tracking-wider mt-1 shadow-[0_0_15px_rgba(239,68,68,0.2)]">
           <span className="w-2 h-2 rounded-full bg-red-500 animate-ping"></span>
-          <span>🔥 4TH OCTOBER WORKSHOP · માત્ર 5 સીટો ઉપલબ્ધ છે (ONLY 5 SEATS AVAILABLE)</span>
+          <span>🔥 4TH OCTOBER WORKSHOP · માત્ર 1 સીટ ઉપલબ્ધ છે (ONLY 1 SEAT AVAILABLE)</span>
         </div>
         <p className="text-white/50 text-xs mt-2 uppercase tracking-wider font-semibold">
           વહેલા તે પહેલાના ધોરણે રજીસ્ટ્રેશન (First Come, First Served)
@@ -168,7 +168,7 @@ export default function RegistrationForm() {
               </option>
               {!loadingWorkshops && workshops.map(ws => (
                 <option key={ws.id} value={ws.id} disabled={ws.isFull}>
-                  {ws.date} - {ws.location} {ws.isFull ? '(SOLD OUT)' : '(Only 5 Seats Available)'}
+                  {ws.date} - {ws.location} {ws.isFull ? '(SOLD OUT)' : '(Only 1 Seat Available)'}
                 </option>
               ))}
             </select>
