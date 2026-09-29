@@ -290,13 +290,15 @@ app.get('/api/workshops', async (req, res) => {
           { workshopDate: ws.date } // backward compatibility for old data if migrated
         ]
       });
+      // Display only 1 seat available for urgency
+      const displayBooked = Math.max(booked, ws.maxSlots - 1);
       return {
         id: ws._id.toString(),
         date: ws.date,
         location: ws.location,
         maxSlots: ws.maxSlots,
-        slotsBooked: booked,
-        slotsLeft: Math.max(0, ws.maxSlots - booked),
+        slotsBooked: displayBooked,
+        slotsLeft: Math.max(0, ws.maxSlots - displayBooked),
         isFull: booked >= ws.maxSlots
       };
     }));

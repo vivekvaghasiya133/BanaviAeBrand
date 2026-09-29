@@ -62,8 +62,9 @@ export default function UpcomingWorkshops() {
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {workshops.map(ws => {
-              const booked = ws.slotsBooked;
-              const total = ws.maxSlots;
+              const total = ws.maxSlots || 30;
+              // Ensure only 1 seat is shown as available (29 booked, 1 remaining)
+              const booked = ws.isFull ? total : Math.max(ws.slotsBooked || 0, total - 1);
               
               // Generate array of slots for the grid
               const slots = Array.from({ length: total }, (_, i) => ({
@@ -95,30 +96,40 @@ export default function UpcomingWorkshops() {
                     {/* The Grid */}
                     <div className="bg-[#0A0A0F] rounded-2xl p-6 border border-white/5">
                       <div className="grid grid-cols-5 sm:grid-cols-10 gap-2 mb-4">
-                        {slots.map((slot) => (
-                          <div
-                            key={slot.id}
-                            className={`
-                              aspect-square rounded flex items-center justify-center text-[10px] font-bold transition-all duration-500
-                              ${slot.isBooked 
-                                ? 'bg-[#3B82F6]/20 border border-[#3B82F6]/40 text-[#3B82F6] shadow-[0_0_10px_rgba(59,130,246,0.2)]' 
-                                : 'bg-white/5 border border-white/10 text-white/20'
-                              }
-                            `}
-                          >
-                            {slot.id < 10 ? `0${slot.id}` : slot.id}
-                          </div>
-                        ))}
+                        {slots.map((slot) => {
+                          const isLastAvailable = !slot.isBooked;
+                          return (
+                            <div
+                              key={slot.id}
+                              className={`
+                                aspect-square rounded flex items-center justify-center text-[10px] font-bold transition-all duration-500 relative
+                                ${slot.isBooked 
+                                  ? 'bg-[#3B82F6]/20 border border-[#3B82F6]/40 text-[#3B82F6] shadow-[0_0_10px_rgba(59,130,246,0.2)]' 
+                                  : 'bg-red-500/20 border-2 border-red-500 text-red-400 shadow-[0_0_15px_rgba(239,68,68,0.5)] animate-pulse'
+                                }
+                              `}
+                              title={slot.isBooked ? 'Seat Booked' : 'Only 1 Seat Available!'}
+                            >
+                              {slot.id < 10 ? `0${slot.id}` : slot.id}
+                              {isLastAvailable && (
+                                <span className="absolute -top-1 -right-1 flex h-2 w-2">
+                                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                                  <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+                                </span>
+                              )}
+                            </div>
+                          );
+                        })}
                       </div>
                       
                       <div className="flex justify-center items-center gap-6 text-xs font-bold text-white/40 tracking-wider">
                         <div className="flex items-center gap-2">
-                          <div className="w-2 h-2 rounded-sm bg-white/10"></div>
-                          <span>AVAILABLE</span>
+                          <div className="w-2.5 h-2.5 rounded-sm bg-red-500/30 border border-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)] animate-pulse"></div>
+                          <span className="text-red-400 font-bold">AVAILABLE (ONLY 1 SEAT LEFT)</span>
                         </div>
                         <div className="flex items-center gap-2">
                           <div className="w-2 h-2 rounded-sm bg-[#3B82F6] shadow-[0_0_10px_rgba(59,130,246,0.5)]"></div>
-                          <span className="text-[#3B82F6]">BOOKED</span>
+                          <span className="text-[#3B82F6]">BOOKED ({booked}/{total})</span>
                         </div>
                       </div>
                     </div>
