@@ -25,18 +25,18 @@ export default function RegistrationForm() {
   const [loadingWorkshops, setLoadingWorkshops] = useState(true);
 
   useEffect(() => {
-    fetch(`${API_URL}/api/workshops`)
+    fetch(`${API_URL}/api/workshops?_t=${Date.now()}`, { cache: 'no-store' })
       .then(res => res.json())
       .then(data => {
         if (data && data.success) {
           setWorkshops(data.data);
-          // Auto-select 4th October workshop or first available
+          // Auto-select 13th December workshop or first available
           setFormData(prev => {
             if (prev.workshopId) return prev;
-            const octWs = data.data.find(w => 
-              (w.date.toLowerCase().includes('4th oct') || w.date.toLowerCase().includes('oct')) && !w.isFull
+            const decWs = data.data.find(w => 
+              (w.date.toLowerCase().includes('13th dec') || w.date.toLowerCase().includes('dec')) && !w.isFull
             );
-            if (octWs) return { ...prev, workshopId: octWs.id };
+            if (decWs) return { ...prev, workshopId: decWs.id };
             if (data.data.length > 0) return { ...prev, workshopId: data.data[0].id };
             return prev;
           });
@@ -130,9 +130,9 @@ export default function RegistrationForm() {
       
       <div className="mb-8 text-center">
         <h2 className="text-3xl font-black text-white mb-2 uppercase tracking-tight">APPLY FOR BANAVIAEBRAND</h2>
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-red-500/10 border border-red-500/30 rounded-full text-red-400 text-xs font-black uppercase tracking-wider mt-1 shadow-[0_0_15px_rgba(239,68,68,0.2)]">
-          <span className="w-2 h-2 rounded-full bg-red-500 animate-ping"></span>
-          <span>🔥 4TH OCTOBER WORKSHOP · માત્ર 1 સીટ ઉપલબ્ધ છે (ONLY 1 SEAT AVAILABLE)</span>
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-emerald-500/10 border border-emerald-500/30 rounded-full text-emerald-400 text-xs font-black uppercase tracking-wider mt-1 shadow-[0_0_15px_rgba(16,185,129,0.2)]">
+          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+          <span>🔥 13TH DECEMBER WORKSHOP · બધી સીટો ઉપલબ્ધ છે (ALL SEATS AVAILABLE)</span>
         </div>
         <p className="text-white/50 text-xs mt-2 uppercase tracking-wider font-semibold">
           વહેલા તે પહેલાના ધોરણે રજીસ્ટ્રેશન (First Come, First Served)
@@ -168,7 +168,7 @@ export default function RegistrationForm() {
               </option>
               {!loadingWorkshops && workshops.map(ws => (
                 <option key={ws.id} value={ws.id} disabled={ws.isFull}>
-                  {ws.date} - {ws.location} {ws.isFull ? '(SOLD OUT)' : '(Only 1 Seat Available)'}
+                  {ws.date} - {ws.location} {ws.isFull ? '(SOLD OUT)' : `(${ws.slotsLeft !== undefined ? ws.slotsLeft : ws.maxSlots} Seats Available)`}
                 </option>
               ))}
             </select>
@@ -352,7 +352,7 @@ export default function RegistrationForm() {
           disabled={status === 'submitting' || (selectedWorkshop && selectedWorkshop.isFull) || !formData.workshopId}
           className="w-full py-4 mt-6 bg-[#3B82F6] text-black rounded-lg font-black hover:bg-[#2563EB] transition-colors disabled:opacity-50 flex items-center justify-center uppercase tracking-wider"
         >
-          {status === 'submitting' ? 'Submitting...' : 'Apply For BanaviAeBrand (₹10,000)'}
+          {status === 'submitting' ? 'Submitting...' : 'Apply For BanaviAeBrand (₹11,500)'}
         </button>
       </form>
     </div>

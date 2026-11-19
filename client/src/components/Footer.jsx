@@ -234,12 +234,12 @@ export default function Footer({ onOpenOnboarding }) {
             </h4>
             <div className="space-y-3 text-xs text-white/70">
               <div className="p-3.5 rounded-xl bg-white/[0.04] border border-white/5 space-y-2">
-                <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-red-500/10 border border-red-500/30 text-red-400 text-[10px] font-black uppercase tracking-wider">
-                  <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-ping" />
-                  Only 1 Seat Available
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[10px] font-black uppercase tracking-wider">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
+                  All Seats Available
                 </div>
                 <p className="text-white/60 leading-relaxed text-[11px]">
-                  Batch size is strictly limited to 1 seat on a first-come, first-served basis.
+                  13th December Batch: 30 seats open on a first-come, first-served basis.
                 </p>
               </div>
 

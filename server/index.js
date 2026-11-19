@@ -279,6 +279,7 @@ app.delete('/api/admin/users/:id', async (req, res) => {
 
 // Get all workshops with their current booking status
 app.get('/api/workshops', async (req, res) => {
+  res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
   try {
     const workshops = await Workshop.find().lean();
     
@@ -286,19 +287,18 @@ app.get('/api/workshops', async (req, res) => {
     const enrichedWorkshops = await Promise.all(workshops.map(async (ws) => {
       const booked = await Registration.countDocuments({ 
         $or: [
+          { workshopId: ws._id.toString() },
           { workshopId: ws._id },
           { workshopDate: ws.date } // backward compatibility for old data if migrated
         ]
       });
-      // Display only 1 seat available for urgency
-      const displayBooked = Math.max(booked, ws.maxSlots - 1);
       return {
         id: ws._id.toString(),
         date: ws.date,
         location: ws.location,
         maxSlots: ws.maxSlots,
-        slotsBooked: displayBooked,
-        slotsLeft: Math.max(0, ws.maxSlots - displayBooked),
+        slotsBooked: booked,
+        slotsLeft: Math.max(0, ws.maxSlots - booked),
         isFull: booked >= ws.maxSlots
       };
     }));

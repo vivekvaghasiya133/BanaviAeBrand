@@ -41,7 +41,7 @@ export default function FaqSection() {
     },
     {
       q: "What is the fee?",
-      a: "₹10,000."
+      a: "₹11,500."
     },
     {
       q: "Where is it happening?",

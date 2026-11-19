@@ -16,7 +16,7 @@ export default function LaunchSequence() {
     if (el) {
       el.scrollIntoView({ behavior: 'smooth', block: 'start' });
       window.dispatchEvent(new CustomEvent('selectWorkshop', { 
-        detail: { workshopDate: '4th October' } 
+        detail: { workshopDate: '13th December' } 
       }));
       setTimeout(() => {
         const input = el.querySelector('input[name="name"]') || el.querySelector('input');
@@ -95,24 +95,24 @@ export default function LaunchSequence() {
 
       <div className="max-w-7xl mx-auto px-6 relative z-10">
         <div className="text-center max-w-3xl mx-auto mb-16">
-          {/* 4th Oct Workshop Highlight Banner */}
+          {/* 13th Dec Workshop Highlight Banner */}
           <div 
             onClick={handleRegisterClick}
             data-cursor-label="Register"
-            className="inline-flex flex-wrap items-center justify-center gap-2.5 sm:gap-3.5 px-5 sm:px-7 py-3 rounded-full bg-gradient-to-r from-blue-600/20 via-purple-600/25 to-red-500/20 border border-blue-500/40 hover:border-blue-400 shadow-[0_0_30px_rgba(59,130,246,0.35)] hover:shadow-[0_0_45px_rgba(59,130,246,0.55)] transition-all duration-300 cursor-pointer group mb-6 transform hover:-translate-y-0.5 active:translate-y-0"
+            className="inline-flex flex-wrap items-center justify-center gap-2.5 sm:gap-3.5 px-5 sm:px-7 py-3 rounded-full bg-gradient-to-r from-blue-600/20 via-purple-600/25 to-emerald-500/20 border border-blue-500/40 hover:border-blue-400 shadow-[0_0_30px_rgba(59,130,246,0.35)] hover:shadow-[0_0_45px_rgba(59,130,246,0.55)] transition-all duration-300 cursor-pointer group mb-6 transform hover:-translate-y-0.5 active:translate-y-0"
           >
             <span className="flex items-center gap-2 text-xs sm:text-sm font-black text-white tracking-wide">
               <span className="relative flex h-2.5 w-2.5">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500"></span>
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
               </span>
-              <span>4th October Live Workshop — Registration Open</span>
+              <span>13th December Live Workshop — Registration Open</span>
             </span>
 
             <span className="text-white/20 hidden sm:inline">|</span>
 
-            <span className="px-3 py-1 rounded-full bg-red-500/20 border border-red-500/40 text-red-400 text-xs font-black tracking-wider uppercase animate-pulse">
-              🔥 Only 1 Seat Available
+            <span className="px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 text-xs font-black tracking-wider uppercase animate-pulse">
+              🔥 All Seats Available
             </span>
 
             <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-[#3B82F6] text-black font-black text-xs uppercase tracking-wider group-hover:bg-white group-hover:scale-105 transition-all duration-200 shadow-md">

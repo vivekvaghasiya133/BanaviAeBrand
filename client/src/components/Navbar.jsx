@@ -45,7 +45,7 @@ export default function Navbar({ onOpenOnboarding }) {
     if (el) {
       el.scrollIntoView({ behavior: 'smooth', block: 'start' });
       window.dispatchEvent(new CustomEvent('selectWorkshop', { 
-        detail: { workshopDate: '4th October' } 
+        detail: { workshopDate: '13th December' } 
       }));
       setTimeout(() => {
         const input = el.querySelector('input[name="name"]') || el.querySelector('input');
@@ -64,22 +64,22 @@ export default function Navbar({ onOpenOnboarding }) {
           : 'bg-[#050507]/85 backdrop-blur-md border-b border-white/5'
       }`}
     >
-      {/* 4th Oct Top Announcement Bar */}
+      {/* 13th Dec Top Announcement Bar */}
       <div 
         onClick={handleBookSlot}
         className="w-full bg-gradient-to-r from-blue-950/90 via-indigo-950/90 to-blue-950/90 border-b border-blue-500/20 py-1.5 px-4 cursor-pointer hover:border-blue-500/50 transition-all group"
       >
         <div className="max-w-7xl mx-auto flex items-center justify-center gap-2 sm:gap-3 text-xs sm:text-sm">
           <span className="relative flex h-2 w-2">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
           </span>
           <span className="text-white/90 font-medium">
-            Next Batch: <strong className="text-white font-extrabold">4th October Workshop (Surat)</strong>
+            Next Batch: <strong className="text-white font-extrabold">13th December Workshop (Surat)</strong>
           </span>
           <span className="text-white/20 hidden sm:inline">|</span>
-          <span className="bg-red-500/20 border border-red-500/30 text-red-400 px-2 py-0.5 rounded-full text-[11px] sm:text-xs font-black uppercase tracking-wider animate-pulse">
-            🔥 Only 1 Seat Available
+          <span className="bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 px-2 py-0.5 rounded-full text-[11px] sm:text-xs font-black uppercase tracking-wider animate-pulse">
+            🔥 All Seats Available
           </span>
           <span className="text-[#3B82F6] font-bold inline-flex items-center gap-1 group-hover:text-white transition-colors ml-1">
             Register Now <ArrowRight size={12} className="group-hover:translate-x-1 transition-transform" />
@@ -225,11 +225,11 @@ export default function Navbar({ onOpenOnboarding }) {
         <div className="hidden md:flex items-center">
           <button
             onClick={handleBookSlot}
-            data-cursor-label="Book 4th Oct"
+            data-cursor-label="Book 13th Dec"
             className="px-4 py-2 rounded-lg bg-[#3B82F6] text-black text-sm font-bold tracking-wide hover:bg-[#2563EB] hover:shadow-[0_0_20px_rgba(59,130,246,0.5)] transition-all duration-300 transform hover:-translate-y-0.5 active:translate-y-0 flex items-center gap-2"
           >
-            <span>Book Slot (4th Oct)</span>
-            <span className="w-1.5 h-1.5 rounded-full bg-red-600 animate-ping" />
+            <span>Book Slot (13th Dec)</span>
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
           </button>
         </div>
 
@@ -300,8 +300,8 @@ export default function Navbar({ onOpenOnboarding }) {
             }}
             className="w-full py-3.5 rounded-xl bg-[#3B82F6] text-black font-extrabold text-center mt-4 shadow-[0_0_20px_rgba(59,130,246,0.4)] flex items-center justify-center gap-2"
           >
-            <span>Book Slot (4th Oct — 1 Seat Left)</span>
-            <span className="w-2 h-2 rounded-full bg-red-600 animate-ping" />
+            <span>Book Slot (13th Dec — All Seats Available)</span>
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
           </button>
         </div>
       )}

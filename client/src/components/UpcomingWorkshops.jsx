@@ -7,7 +7,7 @@ export default function UpcomingWorkshops() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch(`${API_URL}/api/workshops`)
+    fetch(`${API_URL}/api/workshops?_t=${Date.now()}`, { cache: 'no-store' })
       .then(res => res.json())
       .then(data => {
         if (data && data.success) {
@@ -45,7 +45,7 @@ export default function UpcomingWorkshops() {
           <div className="inline-flex items-center gap-2 px-3.5 py-1 bg-[#3B82F6]/10 border border-[#3B82F6]/20 text-[#3B82F6] text-xs font-bold uppercase tracking-widest rounded-full mb-4">
             <span>FOUNDING BATCH</span>
             <span className="text-white/30">·</span>
-            <span className="text-red-400 font-black animate-pulse">🔥 ONLY 1 SEAT AVAILABLE</span>
+            <span className="text-emerald-400 font-black animate-pulse">🔥 ALL SEATS AVAILABLE</span>
           </div>
           <h2 className="text-4xl md:text-5xl font-black uppercase tracking-tight">
             Upcoming <span className="text-[#3B82F6]">Workshops</span>
@@ -63,8 +63,8 @@ export default function UpcomingWorkshops() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {workshops.map(ws => {
               const total = ws.maxSlots || 30;
-              // Ensure only 1 seat is shown as available (29 booked, 1 remaining)
-              const booked = ws.isFull ? total : Math.max(ws.slotsBooked || 0, total - 1);
+              const booked = ws.isFull ? total : (ws.slotsBooked || 0);
+              const available = Math.max(0, total - booked);
               
               // Generate array of slots for the grid
               const slots = Array.from({ length: total }, (_, i) => ({
@@ -86,9 +86,9 @@ export default function UpcomingWorkshops() {
                       <h3 className="text-2xl font-black text-white mb-3">{ws.date}</h3>
                       <div className="flex flex-wrap items-center gap-3 text-sm text-white/60 font-medium">
                         <span className="flex items-center gap-1.5"><MapPin size={16} className="text-[#3B82F6]" /> {ws.location}</span>
-                        <span className="flex items-center gap-1.5 font-bold text-red-400 bg-red-500/10 px-2.5 py-1 rounded-full border border-red-500/20 text-xs">
-                          <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-ping" />
-                          Only 1 Seat Available
+                        <span className="flex items-center gap-1.5 font-bold text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/20 text-xs">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
+                          {available === total ? 'All Seats Available' : `${available} Seats Available`}
                         </span>
                       </div>
                     </div>
@@ -97,7 +97,6 @@ export default function UpcomingWorkshops() {
                     <div className="bg-[#0A0A0F] rounded-2xl p-6 border border-white/5">
                       <div className="grid grid-cols-5 sm:grid-cols-10 gap-2 mb-4">
                         {slots.map((slot) => {
-                          const isLastAvailable = !slot.isBooked;
                           return (
                             <div
                               key={slot.id}
@@ -105,18 +104,12 @@ export default function UpcomingWorkshops() {
                                 aspect-square rounded flex items-center justify-center text-[10px] font-bold transition-all duration-500 relative
                                 ${slot.isBooked 
                                   ? 'bg-[#3B82F6]/20 border border-[#3B82F6]/40 text-[#3B82F6] shadow-[0_0_10px_rgba(59,130,246,0.2)]' 
-                                  : 'bg-red-500/20 border-2 border-red-500 text-red-400 shadow-[0_0_15px_rgba(239,68,68,0.5)] animate-pulse'
+                                  : 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 hover:border-emerald-400 hover:bg-emerald-500/20 shadow-[0_0_8px_rgba(16,185,129,0.15)]'
                                 }
                               `}
-                              title={slot.isBooked ? 'Seat Booked' : 'Only 1 Seat Available!'}
+                              title={slot.isBooked ? 'Seat Booked' : 'Seat Available'}
                             >
                               {slot.id < 10 ? `0${slot.id}` : slot.id}
-                              {isLastAvailable && (
-                                <span className="absolute -top-1 -right-1 flex h-2 w-2">
-                                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                                  <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
-                                </span>
-                              )}
                             </div>
                           );
                         })}
@@ -124,8 +117,8 @@ export default function UpcomingWorkshops() {
                       
                       <div className="flex justify-center items-center gap-6 text-xs font-bold text-white/40 tracking-wider">
                         <div className="flex items-center gap-2">
-                          <div className="w-2.5 h-2.5 rounded-sm bg-red-500/30 border border-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)] animate-pulse"></div>
-                          <span className="text-red-400 font-bold">AVAILABLE (ONLY 1 SEAT LEFT)</span>
+                          <div className="w-2.5 h-2.5 rounded-sm bg-emerald-500/30 border border-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"></div>
+                          <span className="text-emerald-400 font-bold">AVAILABLE ({available}/{total})</span>
                         </div>
                         <div className="flex items-center gap-2">
                           <div className="w-2 h-2 rounded-sm bg-[#3B82F6] shadow-[0_0_10px_rgba(59,130,246,0.5)]"></div>

@@ -93,7 +93,7 @@ export default function AdminPanel() {
 
   const fetchWorkshops = async () => {
     try {
-      const res = await fetch(`${API_URL}/api/workshops`);
+      const res = await fetch(`${API_URL}/api/workshops?_t=${Date.now()}`, { cache: 'no-store' });
       const data = await res.json();
       if (data.success) {
         setWorkshops(data.data);
@@ -577,7 +577,7 @@ export default function AdminPanel() {
                       <input 
                         type="text" required
                         value={newWorkshop.date} onChange={e => setNewWorkshop({...newWorkshop, date: e.target.value})}
-                        placeholder="e.g. 4th October 2025"
+                        placeholder="e.g. 13th December 2025"
                         className="w-full pl-9 pr-3 py-2.5 bg-black border border-white/10 rounded-xl text-white text-sm focus:border-[#3B82F6] outline-none transition-all"
                       />
                     </div>

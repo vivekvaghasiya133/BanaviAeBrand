@@ -28,12 +28,12 @@ export default function PricingSection() {
               <span className="inline-block px-4 py-1 bg-[#3B82F6]/10 border border-[#3B82F6] text-[#3B82F6] rounded-full text-sm font-bold tracking-widest uppercase">
                 FOUNDING BATCH
               </span>
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-red-500/10 border border-red-500/30 text-red-400 rounded-full text-xs font-black uppercase tracking-wider animate-pulse shadow-[0_0_12px_rgba(239,68,68,0.3)]">
-                🔥 Only 1 Seat Left
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 rounded-full text-xs font-black uppercase tracking-wider animate-pulse shadow-[0_0_12px_rgba(16,185,129,0.3)]">
+                🔥 All Seats Available
               </span>
             </div>
             <h2 className="text-5xl md:text-7xl font-black text-white tracking-tighter mb-4">
-              ₹10,000
+              ₹11,500
             </h2>
             <p className="text-white/60 text-lg font-medium uppercase tracking-widest">
               ONE-DAY REAL-WORLD EXPERIENCE
@@ -57,7 +57,7 @@ export default function PricingSection() {
                 if (el) {
                   el.scrollIntoView({ behavior: 'smooth', block: 'start' });
                   window.dispatchEvent(new CustomEvent('selectWorkshop', { 
-                    detail: { workshopDate: '4th October' } 
+                    detail: { workshopDate: '13th December' } 
                   }));
                   setTimeout(() => {
                     const input = el.querySelector('input[name="name"]') || el.querySelector('input');
@@ -69,11 +69,11 @@ export default function PricingSection() {
               }}
               className="px-10 py-5 bg-[#3B82F6] text-black text-lg md:text-xl font-black rounded-xl hover:bg-[#2563EB] transition-colors uppercase tracking-wider w-full md:w-auto shadow-[0_0_30px_rgba(59,130,246,0.3)] hover:scale-105 duration-300 cursor-pointer"
             >
-              BOOK YOUR SLOT — 4TH OCT (1 SEAT ONLY)
+              BOOK YOUR SLOT — 13TH DEC (ALL SEATS AVAILABLE)
             </button>
-            <p className="text-red-400 mt-4 text-sm font-bold uppercase tracking-widest flex items-center justify-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-red-500 animate-ping"></span>
-              Hurry! Only 1 seat available for 4th October batch.
+            <p className="text-emerald-400 mt-4 text-sm font-bold uppercase tracking-widest flex items-center justify-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+              Registrations Open! All seats currently available for 13th December batch.
             </p>
           </div>
         </div>
