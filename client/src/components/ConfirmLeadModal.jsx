@@ -6,7 +6,7 @@ export default function ConfirmLeadModal({ isOpen, onClose, lead, workshops = []
   if (!isOpen || !lead) return null;
 
   const [confirmedCourse, setConfirmedCourse] = useState(
-    lead.workshopDate || (workshops.length > 0 ? workshops[0].date : '13th December 2025 (Surat)')
+    lead.workshopDate || (workshops.length > 0 ? workshops[0].date : '26th December 2026 (Surat)')
   );
   const [confirmedNote, setConfirmedNote] = useState('');
   const [callerName, setCallerName] = useState(lead.latestCallerName || defaultCaller);
@@ -114,7 +114,7 @@ export default function ConfirmLeadModal({ isOpen, onClose, lead, workshops = []
                   {ws.date} — {ws.location} ({ws.slotsBooked}/{ws.maxSlots} Booked)
                 </option>
               ))}
-              <option value="13th December 2025 (Surat)">13th December 2025 (Surat)</option>
+              <option value="26th December 2026 (Surat)">26th December 2026 (Surat)</option>
               <option value="4th October 2025 (Surat)">4th October 2025 (Surat) - Completed</option>
               <option value="Online 1-on-1 Content Mentorship">Online 1-on-1 Content Mentorship</option>
               <option value="Personal Brand Mastery">Personal Brand Mastery</option>

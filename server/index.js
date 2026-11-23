@@ -292,14 +292,16 @@ app.get('/api/workshops', async (req, res) => {
           { workshopDate: ws.date } // backward compatibility for old data if migrated
         ]
       });
+      // 10 seats booked as requested for 2026 last batch
+      const effectiveBooked = Math.min(ws.maxSlots, Math.max(10, booked));
       return {
         id: ws._id.toString(),
         date: ws.date,
         location: ws.location,
         maxSlots: ws.maxSlots,
-        slotsBooked: booked,
-        slotsLeft: Math.max(0, ws.maxSlots - booked),
-        isFull: booked >= ws.maxSlots
+        slotsBooked: effectiveBooked,
+        slotsLeft: Math.max(0, ws.maxSlots - effectiveBooked),
+        isFull: effectiveBooked >= ws.maxSlots
       };
     }));
     

@@ -43,9 +43,9 @@ export default function UpcomingWorkshops() {
       <div className="max-w-7xl mx-auto px-6 relative z-10">
         <div className="text-center mb-16">
           <div className="inline-flex items-center gap-2 px-3.5 py-1 bg-[#3B82F6]/10 border border-[#3B82F6]/20 text-[#3B82F6] text-xs font-bold uppercase tracking-widest rounded-full mb-4">
-            <span>FOUNDING BATCH</span>
+            <span>2026 LAST BATCH</span>
             <span className="text-white/30">·</span>
-            <span className="text-emerald-400 font-black animate-pulse">🔥 ALL SEATS AVAILABLE</span>
+            <span className="text-amber-400 font-black animate-pulse">🔥 ONLY 16 SEATS LEFT (10 BOOKED)</span>
           </div>
           <h2 className="text-4xl md:text-5xl font-black uppercase tracking-tight">
             Upcoming <span className="text-[#3B82F6]">Workshops</span>
@@ -62,7 +62,7 @@ export default function UpcomingWorkshops() {
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {workshops.map(ws => {
-              const total = ws.maxSlots || 30;
+              const total = ws.maxSlots || 26;
               const booked = ws.isFull ? total : (ws.slotsBooked || 0);
               const available = Math.max(0, total - booked);
               
@@ -86,9 +86,9 @@ export default function UpcomingWorkshops() {
                       <h3 className="text-2xl font-black text-white mb-3">{ws.date}</h3>
                       <div className="flex flex-wrap items-center gap-3 text-sm text-white/60 font-medium">
                         <span className="flex items-center gap-1.5"><MapPin size={16} className="text-[#3B82F6]" /> {ws.location}</span>
-                        <span className="flex items-center gap-1.5 font-bold text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/20 text-xs">
-                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
-                          {available === total ? 'All Seats Available' : `${available} Seats Available`}
+                        <span className="flex items-center gap-1.5 font-bold text-amber-400 bg-amber-500/10 px-2.5 py-1 rounded-full border border-amber-500/20 text-xs">
+                          <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-ping" />
+                          {available} Seats Available ({booked} Booked)
                         </span>
                       </div>
                     </div>

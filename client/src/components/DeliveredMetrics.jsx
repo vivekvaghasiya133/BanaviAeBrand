@@ -10,13 +10,13 @@ export default function DeliveredMetrics() {
       icon: <Clock className="w-5 h-5 text-lime" />,
     },
     {
-      value: "1",
-      unit: "SEAT",
-      label: "Founding Batch (Limited)",
+      value: "16",
+      unit: "SEATS",
+      label: "2026 Last Batch (10 Booked)",
       icon: <Users className="w-5 h-5 text-[#00D4E8]" />,
     },
     {
-      value: "30",
+      value: "26",
       unit: "BRANDS",
       label: "Real Challenges",
       icon: <Target className="w-5 h-5 text-[#EC4899]" />,

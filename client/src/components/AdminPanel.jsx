@@ -39,7 +39,7 @@ export default function AdminPanel() {
   // Workshops state
   const [workshops, setWorkshops] = useState([]);
   const [loadingWorkshops, setLoadingWorkshops] = useState(true);
-  const [newWorkshop, setNewWorkshop] = useState({ date: '', location: '', maxSlots: 30 });
+  const [newWorkshop, setNewWorkshop] = useState({ date: '', location: '', maxSlots: 26 });
 
   // Login inputs
   const [loginUsername, setLoginUsername] = useState('');
@@ -116,7 +116,7 @@ export default function AdminPanel() {
         body: JSON.stringify(newWorkshop)
       });
       if (res.ok) {
-        setNewWorkshop({ date: '', location: '', maxSlots: 30 });
+        setNewWorkshop({ date: '', location: '', maxSlots: 26 });
         fetchWorkshops();
       }
     } catch (err) { console.error(err); }
@@ -577,7 +577,7 @@ export default function AdminPanel() {
                       <input 
                         type="text" required
                         value={newWorkshop.date} onChange={e => setNewWorkshop({...newWorkshop, date: e.target.value})}
-                        placeholder="e.g. 13th December 2025"
+                        placeholder="e.g. 26th December 2026"
                         className="w-full pl-9 pr-3 py-2.5 bg-black border border-white/10 rounded-xl text-white text-sm focus:border-[#3B82F6] outline-none transition-all"
                       />
                     </div>

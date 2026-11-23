@@ -30,11 +30,11 @@ export default function RegistrationForm() {
       .then(data => {
         if (data && data.success) {
           setWorkshops(data.data);
-          // Auto-select 13th December workshop or first available
+          // Auto-select 26th December workshop or first available
           setFormData(prev => {
             if (prev.workshopId) return prev;
             const decWs = data.data.find(w => 
-              (w.date.toLowerCase().includes('13th dec') || w.date.toLowerCase().includes('dec')) && !w.isFull
+              (w.date.toLowerCase().includes('26th dec') || w.date.toLowerCase().includes('dec')) && !w.isFull
             );
             if (decWs) return { ...prev, workshopId: decWs.id };
             if (data.data.length > 0) return { ...prev, workshopId: data.data[0].id };
@@ -130,9 +130,9 @@ export default function RegistrationForm() {
       
       <div className="mb-8 text-center">
         <h2 className="text-3xl font-black text-white mb-2 uppercase tracking-tight">APPLY FOR BANAVIAEBRAND</h2>
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-emerald-500/10 border border-emerald-500/30 rounded-full text-emerald-400 text-xs font-black uppercase tracking-wider mt-1 shadow-[0_0_15px_rgba(16,185,129,0.2)]">
-          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
-          <span>🔥 13TH DECEMBER WORKSHOP · બધી સીટો ઉપલબ્ધ છે (ALL SEATS AVAILABLE)</span>
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-amber-500/10 border border-amber-500/30 rounded-full text-amber-400 text-xs font-black uppercase tracking-wider mt-1 shadow-[0_0_15px_rgba(245,158,11,0.2)]">
+          <span className="w-2 h-2 rounded-full bg-amber-500 animate-ping"></span>
+          <span>🔥 26TH DECEMBER 2026 WORKSHOP · 2026 ની છેલ્લી બેચ (ONLY 16 SEATS LEFT)</span>
         </div>
         <p className="text-white/50 text-xs mt-2 uppercase tracking-wider font-semibold">
           વહેલા તે પહેલાના ધોરણે રજીસ્ટ્રેશન (First Come, First Served)

@@ -308,16 +308,16 @@ export default function HeroSolarSystem({ onOpenOnboarding }) {
           <div className="flex flex-wrap items-center justify-start gap-3 mb-6 lg:mb-10">
             <span className="w-10 h-px bg-[#3B82F6]" />
             <span className="text-[#3B82F6] text-xs font-bold tracking-[0.4em] uppercase">
-              બનાવીએ બ્રાન્ડ · ALL SEATS AVAILABLE
+              બનાવીએ બ્રાન્ડ · 2026 LAST BATCH
             </span>
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[11px] font-black uppercase tracking-wider animate-pulse shadow-[0_0_12px_rgba(16,185,129,0.3)]">
-              🔥 All Seats Available
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-[11px] font-black uppercase tracking-wider animate-pulse shadow-[0_0_12px_rgba(245,158,11,0.3)]">
+              🔥 Only 16 Seats Left (10 Booked)
             </span>
           </div>
 
           {/* Huge Dynamic Headline */}
           <div className="mb-6 lg:mb-10 select-none">
-            {/* Line 1: 30 PEOPLE. */}
+            {/* Line 1: 26 MEMBERS. */}
             <div className="overflow-hidden">
               <div
                 className="leading-[0.88] tracking-tight"
@@ -330,7 +330,7 @@ export default function HeroSolarSystem({ onOpenOnboarding }) {
                   fontWeight: 300,
                 }}
               >
-                30 PEOPLE.
+                26 MEMBERS.
               </div>
             </div>
 
@@ -398,7 +398,7 @@ export default function HeroSolarSystem({ onOpenOnboarding }) {
                   if (el) {
                     el.scrollIntoView({ behavior: 'smooth', block: 'start' });
                     window.dispatchEvent(new CustomEvent('selectWorkshop', { 
-                      detail: { workshopDate: '13th December' } 
+                      detail: { workshopDate: '26th December 2026' } 
                     }));
                     setTimeout(() => {
                       const input = el.querySelector('input[name="name"]') || el.querySelector('input');
@@ -408,10 +408,10 @@ export default function HeroSolarSystem({ onOpenOnboarding }) {
                     window.location.href = '#register';
                   }
                 }}
-                data-cursor-label="Book 13th Dec"
+                data-cursor-label="Book 26th Dec"
                 className="group flex items-center gap-3 px-8 py-4 bg-[#3B82F6] text-white font-black rounded-full hover:bg-white hover:text-black transition-all duration-300 hover:scale-105 shadow-[0_0_40px_rgba(59,130,246,0.3)] text-sm uppercase tracking-wider cursor-pointer"
               >
-                <span>Book Slot (13th Dec · All Seats Available)</span>
+                <span>Book Slot (26th Dec · 16 Seats Left)</span>
                 <svg
                   width="14"
                   height="14"

@@ -11,18 +11,18 @@ export default function FinalCTA() {
         </h2>
         
         <div className="flex flex-col md:flex-row items-center justify-center gap-6 mb-10 text-2xl md:text-3xl font-bold uppercase tracking-wider">
-          <span>30 PEOPLE.</span>
+          <span>26 PEOPLE.</span>
           <span className="hidden md:block w-2 h-2 bg-black rounded-full"></span>
-          <span>30 BUSINESSES.</span>
+          <span>26 BUSINESSES.</span>
           <span className="hidden md:block w-2 h-2 bg-black rounded-full"></span>
           <span>1 DAY.</span>
         </div>
 
         <div className="mb-12">
           <div className="text-6xl md:text-8xl font-black tracking-tighter mb-2">₹11,500</div>
-          <div className="text-lg font-bold uppercase tracking-widest bg-black text-emerald-400 inline-flex items-center gap-2 px-4 py-1.5 rounded-sm border border-emerald-500/40 shadow-[0_0_15px_rgba(16,185,129,0.3)]">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
-            13TH DEC BATCH — ALL SEATS AVAILABLE
+          <div className="text-lg font-bold uppercase tracking-widest bg-black text-amber-400 inline-flex items-center gap-2 px-4 py-1.5 rounded-sm border border-amber-500/40 shadow-[0_0_15px_rgba(245,158,11,0.3)]">
+            <span className="w-2 h-2 rounded-full bg-amber-500 animate-ping"></span>
+            2026 LAST BATCH (26TH DEC) — 16 SEATS LEFT (10 BOOKED)
           </div>
         </div>
 
@@ -42,7 +42,7 @@ export default function FinalCTA() {
           }}
           className="px-12 py-6 bg-black text-[#3B82F6] text-xl md:text-2xl font-black rounded-2xl hover:bg-neutral-900 transition-colors uppercase tracking-widest shadow-[0_20px_50px_rgba(0,0,0,0.3)] hover:scale-105 duration-300 cursor-pointer"
         >
-          BOOK YOUR SLOT — ALL SEATS AVAILABLE
+          BOOK YOUR SLOT — 16 SEATS LEFT
         </button>
         
         <p className="mt-6 text-black/70 font-bold uppercase tracking-widest text-sm">

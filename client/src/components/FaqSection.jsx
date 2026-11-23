@@ -37,7 +37,7 @@ export default function FaqSection() {
     },
     {
       q: "How many people can join?",
-      a: "Only 30 participants in the Founding Batch."
+      a: "Strictly limited to 26 participants in the 2026 Last Batch."
     },
     {
       q: "What is the fee?",
